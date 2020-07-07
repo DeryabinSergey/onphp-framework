@@ -22,6 +22,7 @@
 		private $domain		= null;
 		private $secure		= false;
 		private $httpOnly	= false;
+		private $sameSite	= 'Lax';
 		
 		/**
 		 * @return Cookie
@@ -119,6 +120,31 @@
 			return $this->httpOnly;
 		}
 		
+		public function setSameSiteStrict()
+		{       
+			$this->sameSite = 'Strict';
+		        return $this;
+		}
+		
+		public function setSameSiteLax()
+		{
+			$this->sameSite = 'Lax';
+			
+			return $this;
+		}
+		
+		public function setSameSiteNone()
+		{
+			$this->sameSite = 'None';
+			
+			return $this;
+		}
+		
+		public function getSameSite()
+		{
+			return $this->sameSite;
+		}
+
 		public function httpSet()
 		{
 			if (headers_sent())
@@ -128,13 +154,14 @@
 				setcookie(
 					$this->getName(),
 					$this->getValue(),
-					($this->getMaxAge() === 0)
-						? 0
-						: $this->getMaxAge() + time(),
-					$this->getPath(),
-					$this->getDomain(),
-					$this->getSecure(),
-					$this->getHttpOnly()
+					array(
+						'expires'   => $this->getMaxAge() === 0 ? 0 : $this->getMaxAge() + time(),
+						'path'      => $this->getPath(),
+						'domain'    => $this->getDomain(),
+						'secure'    => $this->getSecure(),
+						'httponly'  => $this->getHttpOnly(),
+						'samesite'  => $this->getSameSite()
+					)
 				);
 		}
 	}
