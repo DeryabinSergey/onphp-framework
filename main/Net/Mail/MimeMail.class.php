@@ -24,6 +24,29 @@
 		
 		private $boundary	= null;
 		
+		private $contentType	= null;
+		
+		public static function create()
+		{
+			return new self;
+		}
+		
+		public function __construct()
+		{
+			// useful defaults
+			$this->contentType      = 'multipart/mixed';
+		}
+		
+		/**
+		 * @return MimeMail
+		**/
+		public function setContentType($type)
+		{
+			$this->contentType = $type;
+		
+			return $this;
+		}
+		
 		/**
 		 * @return MimeMail
 		**/
@@ -34,17 +57,20 @@
 			return $this;
 		}
 		
+		/**
+		 * @return MimeMail
+		**/
 		public function build()
 		{
 			if (!$this->parts)
 				throw new UnimplementedFeatureException();
 			
 			if (!$this->boundary)
-				$this->boundary = '=_'.md5(microtime(true));
+				$this->boundary = '=_'.md5(microtime(true)*rand(1, 1000));
 			
 			$mail =
 				MimePart::create()->
-				setContentType('multipart/mixed')->
+				setContentType($this->contentType)->
 				setBoundary($this->boundary);
 			
 			$this->headers =
@@ -59,6 +85,8 @@
 					.$part->getEncodedBody()."\n";
 			
 			$this->body .= '--'.$this->boundary."--"."\n\n";
+			
+			return $this;
 		}
 		
 		public function getEncodedBody()
