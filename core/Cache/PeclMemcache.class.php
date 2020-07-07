@@ -67,7 +67,7 @@
 		}
 		
 		/**
-		 * @return PeclMemcached
+		 * @return PeclMemcache
 		**/
 		public function clean()
 		{
@@ -103,7 +103,7 @@
 			return
 				($return = $this->get($indexes))
 					? $return
-					: array();
+					: null;
 		}
 		
 		public function get($index)
