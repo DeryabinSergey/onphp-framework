@@ -50,7 +50,7 @@
 		/**
 		 * @return MimeMail
 		**/
-		public function addPart(MimePart $part)
+		public function addPart(MailBuilder $part)
 		{
 			$this->parts[] = $part;
 			
