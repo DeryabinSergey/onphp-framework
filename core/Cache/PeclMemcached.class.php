@@ -21,224 +21,249 @@
 	{
 		const DEFAULT_PORT		= 11211;
 		const DEFAULT_HOST		= '127.0.0.1';
-		const DEFAULT_TIMEOUT	= 1;
+		const DEFAULT_WEIGHT		= 1;
+		const DEFAULT_CONNECT_TIMEOUT	= 1000;
 		
-		protected $host			= null;
-		protected $port			= null;
 		private $instance		= null;
+		
+		private $resultCode 	= \Memcached::RES_SUCCESS;
 		private $requestTimeout = null;
-		private $connectTimeout = null;
-		private $triedConnect	= false;
 		
 		/**
+		 * @param string $host - ip sddress
+		 * @param string $port
+		 * @param int $weight
+		 * @param int $connectTimeout - milliseconds
 		 * @return PeclMemcached
-		**/
+		 */
 		public static function create(
 			$host = self::DEFAULT_HOST,
 			$port = self::DEFAULT_PORT,
-			$connectTimeout = self::DEFAULT_TIMEOUT
+			$weight = self::DEFAULT_WEIGHT,
+			$connectTimeout = self::DEFAULT_CONNECT_TIMEOUT
 		)
 		{
-			return new self($host, $port, $connectTimeout);
+			return new self($host, $port, $weight, $connectTimeout);
 		}
 		
+		/**
+		 * @param string $host - ip sddress
+		 * @param string $port
+		 * @param int $weight
+		 * @param int $connectTimeout - milliseconds
+		 */
 		public function __construct(
 			$host = self::DEFAULT_HOST,
 			$port = self::DEFAULT_PORT,
-			$connectTimeout = self::DEFAULT_TIMEOUT
+			$weight = self::DEFAULT_WEIGHT,
+			$connectTimeout = self::DEFAULT_CONNECT_TIMEOUT
 		)
-		{
-			$this->host = $host;
-			$this->port = $port;
-			$this->connectTimeout = $connectTimeout;
+		{	
+			$this->instance = new \Memcached();
+
+			if ($connectTimeout != self::DEFAULT_CONNECT_TIMEOUT) {
+				$this->instance->setOption(\Memcached::OPT_CONNECT_TIMEOUT, $connectTimeout);
+			}
+
+			if ($this->compress == false) {
+				$this->instance->setOption(\Memcached::OPT_COMPRESSION, false);
+			}
+
+			$this->instance->addServer($host, $port, $weight);
+
+			$this->alive = $this->instance->set(self::class, time());
 		}
 		
 		public function __destruct()
 		{
 			if ($this->alive) {
-				try {
-					$this->instance->close();
-				} catch (BaseException $e) {
-					// shhhh.
-				}
+				$this->instance->quit();
 			}
 		}
-		
-		public function isAlive()
-		{
-			$this->ensureTriedToConnect();
-			
-			return parent::isAlive();
-		}
-		
+
 		/**
-		 * @return PeclMemcached
-		**/
-		public function clean()
-		{
-			$this->ensureTriedToConnect();
-			
-			try {
-				$this->instance->flush();
-			} catch (BaseException $e) {
-				$this->alive = false;
-			}
-			
-			return parent::clean();
-		}
-		
-		public function increment($key, $value)
-		{
-			$this->ensureTriedToConnect();
-			
-			try {
-				return $this->instance->increment($key, $value);
-			} catch (BaseException $e) {
-				return null;
-			}
-		}
-		
-		public function decrement($key, $value)
-		{
-			$this->ensureTriedToConnect();
-			
-			try {
-				return $this->instance->decrement($key, $value);
-			} catch (BaseException $e) {
-				return null;
-			}
-		}
-		
-		public function getList($indexes)
-		{
-			$this->ensureTriedToConnect();
-			
-			return
-				($return = $this->get($indexes))
-					? $return
-					: array();
-		}
-		
-		public function get($index)
-		{
-			$this->ensureTriedToConnect();
-			
-			try {
-				return $this->instance->get($index);
-			} catch (BaseException $e) {
-				if(strpos($e->getMessage(), 'Invalid key') !== false)
-					return null;
-				
-				$this->alive = false;
-				
-				return null;
-			}
-			
-			Assert::isUnreachable();
-		}
-		
-		public function delete($index)
-		{
-			$this->ensureTriedToConnect();
-			
-			try {
-				// second parameter required, wrt new memcached protocol:
-				// delete key 0 (see process_delete_command in the memcached.c)
-				// Warning: it is workaround!
-				return $this->instance->delete($index, 0);
-			} catch (BaseException $e) {
-				return $this->alive = false;
-			}
-			
-			Assert::isUnreachable();
-		}
-		
-		public function append($key, $data)
-		{
-			$this->ensureTriedToConnect();
-			
-			try {
-				return $this->instance->append($key, $data);
-			} catch (BaseException $e) {
-				return $this->alive = false;
-			}
-			
-			Assert::isUnreachable();
-		}
-		
-		/**
-		 * @param float $requestTimeout time in seconds
+		 * @param int $option
+		 * @param mixed $value
 		 * @return PeclMemcached
 		 */
-		public function setTimeout($requestTimeout)
+		public function setOption($option, $value)
 		{
-			$this->ensureTriedToConnect();
-			$this->requestTimeout = $requestTimeout;
-			$this->instance->setServerParams($this->host, $this->port, $requestTimeout);
-			
+			$this->instance->setOption($option, $value);
+
 			return $this;
 		}
 		
 		/**
-		 * @return float 
+		 * {@inheritDoc}
+		 * @return PeclMemcached
 		 */
-		public function getTimeout()
+		public function clean($delay = 0)
 		{
+			Assert::isPositiveInteger($delay);
+
+			$this->instance->flush($delay);
+
+			$this->processResultCode();
+
+			return parent::clean();
+		}		
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public function increment($key, $value)
+		{
+			$result = $this->instance->increment($key, $value);
+
+			$this->processResultCode();
+
+			return $result;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public function decrement($key, $value)
+		{
+			$result = $this->instance->decrement($key, $value);
+
+			$this->processResultCode();
+
+			return $result;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public function getList($indexes)
+		{
+			$list = $this->instance->getMulti($indexes);
+
+			$this->processResultCode();
+
+			return ($list !== false && count($list) > 0) ? $list : null;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public function get($index)
+		{
+			$result = $this->instance->get($index);
+
+			$this->processResultCode();
+
+			if ($result === false 
+				&& $this->instance->getResultCode() != \Memcached::RES_SUCCESS
+			) {
+				return null;
+			}
+
+			return $result;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public function delete($index)
+		{
+			// second parameter required, wrt new memcached protocol:
+			// delete key 0 (see process_delete_command in the memcached.c)
+			// Warning: it is workaround!
+			$result = $this->instance->delete($index, 0);
+
+			$this->processResultCode();
+
+			return $result;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public function append($key, $value)
+		{
+			$result = $this->instance->append($key, $value);
+
+			$this->processResultCode();
+
+			return $result;
+		}
+		
+		/**
+		 * @param float $requestTimeout time in miliseconds
+		 * @return PeclMemcached
+		 */
+		public function setTimeout($requestTimeout) {
+			$this->requestTimeout = $requestTimeout;
+
+			$this->instance->setOptions([
+				\Memcached::OPT_SEND_TIMEOUT => $requestTimeout,
+				\Memcached::OPT_RECV_TIMEOUT => $requestTimeout,
+			]);
+
+			return $this;
+		}
+		
+		/**
+		 * @return float
+		 */
+		public function getTimeout() {
 			return $this->requestTimeout;
 		}
 		
-		protected function ensureTriedToConnect()
+		/**
+		 * @return number
+		 */
+		public function getResultCode()
 		{
-			if ($this->triedConnect) 
-				return $this;
-			
-			$this->triedConnect = true;
-			
-			$this->connect();
-			
-			return $this;
+			return $this->resultCode;
 		}
 		
 		protected function store(
 			$action, $key, $value, $expires = Cache::EXPIRES_MEDIUM
 		)
 		{
-			$this->ensureTriedToConnect();
-			
-			try {
-				return
-					$this->instance->$action(
-						$key,
-						$value,
-						$this->compress
-							? MEMCACHE_COMPRESSED
-							: false,
-						$expires
-					);
-			} catch (BaseException $e) {
-				return $this->alive = false;
-			}
-			
-			Assert::isUnreachable();
+			$result =
+				$this->instance->$action(
+					$key,
+					$value,
+					$expires
+				);
+
+			$this->processResultCode();
+
+			return $result;
 		}
 		
-		protected function connect()
+		/**
+		 * @see https://www.php.net/manual/ru/memcached.getresultcode.php
+		 */
+		protected function processResultCode()
 		{
-			$this->instance = new Memcache();
-			
-			try {
-				
-				try {
-					$this->instance->pconnect($this->host, $this->port, $this->connectTimeout);
-				} catch (BaseException $e) {
-					$this->instance->connect($this->host, $this->port, $this->connectTimeout);
-				}
-				
-				$this->alive = true;
-				
-			} catch (BaseException $e) {
-				// bad luck.
+			$this->resultCode = $this->instance->getResultCode();
+
+			switch ($this->resultCode) {
+				case \Memcached::RES_SUCCESS:
+					/* All is ok. */
+					$this->alive = true;
+					break;
+
+				case \Memcached::RES_SERVER_TEMPORARILY_DISABLED:
+				case \Memcached::RES_TIMEOUT:
+				case \Memcached::RES_FAILURE:
+				case \Memcached::RES_HOST_LOOKUP_FAILURE:
+					$this->alive = false;
+					break;
+
+				case \Memcached::RES_UNKNOWN_READ_FAILURE:
+				case \Memcached::RES_SERVER_ERROR:
+				case \Memcached::RES_NO_SERVERS:
+					/* Does it mean that server is not alive? */
+					break;
+
+				default:
+					/* Not interesting */
+					break;
 			}
 		}
 	}
-?>
