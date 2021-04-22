@@ -48,4 +48,4 @@ before_script:
     #- curl -vsf 'http://localhost/curlTest.php' &> /dev/stdout
     
 script:
-    - ./vendor/bin/phpunit --exclude-group amqp,cookie,mail,pinba --verbose --dont-report-useless-tests ./tests/AllTests.php
+    - ./vendor/bin/phpunit --exclude-group amqp,cookie,mail,pinba --verbose --coverage-text --dont-report-useless-tests ./tests/AllTests.php
