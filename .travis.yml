@@ -18,7 +18,8 @@ before_install:
         fi
     - no | pecl install memcached
     - wget https://github.com/alanxz/rabbitmq-c/archive/refs/tags/v0.11.0.tar.gz
-    - tar zxf v0.11.0.tar.gz && cd v0.11.0
+    - tar zxf v0.11.0.tar.gz
+    - cd v0.11.0
     - ./configure
     - make && make install
     - yes | pecl install amqp-1.10.2
