@@ -17,7 +17,10 @@ before_install:
           yes | pecl install memcache
         fi
     - no | pecl install memcached
-    - sudo apt-get install -q -y librabbitmq-dev
+    - wget https://github.com/alanxz/rabbitmq-c/archive/refs/tags/v0.11.0.tar.gz
+    - tar zxf v0.11.0.tar.gz && cd v0.11.0
+    - ./configure
+    - make && make install
     - yes | pecl install amqp-1.10.2
     - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
     - mysql -e 'CREATE DATABASE onphp;'
