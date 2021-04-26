@@ -20,6 +20,9 @@ final class AMQPExchangeType extends Enumeration
 	const TOPIC = 3;
 	const HEADER = 4;
 
+    /**
+     * @var string[]
+     */
 	protected $names = array(
 		self::DIRECT => "direct",
 		self::FANOUT => "fanout",
@@ -27,29 +30,43 @@ final class AMQPExchangeType extends Enumeration
 		self::HEADER => "header"
 	);
 
-	public function getDefault()
+    /**
+     * @return int
+     */
+	public function getDefault(): int
 	{
 		return self::DIRECT;
 	}
 
-	public function isDirect()
+    /**
+     * @return bool
+     */
+	public function isDirect(): bool
 	{
 		return $this->id == self::DIRECT;
 	}
 
-	public function isFanout()
+    /**
+     * @return bool
+     */
+	public function isFanout(): bool
 	{
 		return $this->id == self::FANOUT;
 	}
 
-	public function isTopic()
+    /**
+     * @return bool
+     */
+	public function isTopic(): bool
 	{
 		return $this->id == self::TOPIC;
 	}
 
-	public function isHeader()
+    /**
+     * @return bool
+     */
+	public function isHeader(): bool
 	{
 		return $this->id == self::HEADER;
 	}
 }
-?>

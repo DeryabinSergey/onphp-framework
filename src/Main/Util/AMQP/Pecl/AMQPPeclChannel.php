@@ -11,6 +11,13 @@
 
 namespace OnPHP\Main\Util\AMQP\Pecl;
 
+use AMQPChannel;
+use AMQPConnectionException;
+use AMQPExchange;
+use AMQPExchangeException;
+use AMQPQueue;
+use AMQPQueueException;
+use Exception;
 use OnPHP\Core\Base\Assert;
 use OnPHP\Core\Exception\ObjectNotFoundException;
 use OnPHP\Core\Exception\UnimplementedFeatureException;
@@ -22,69 +29,75 @@ use OnPHP\Main\Util\AMQP\AMQPConsumer;
 use OnPHP\Main\Util\AMQP\AMQPExchangeConfig;
 use OnPHP\Main\Util\AMQP\AMQPExchangeType;
 use OnPHP\Main\Util\AMQP\AMQPIncomingMessage;
-use OnPHP\Main\Util\AMQP\AMQPInterface;
 use OnPHP\Main\Util\AMQP\AMQPOutgoingMessage;
 use OnPHP\Main\Util\AMQP\AMQPQueueConfig;
 use OnPHP\Main\Util\AMQP\Exception\AMQPServerConnectionException;
 use OnPHP\Main\Util\AMQP\Exception\AMQPServerException;
+use Throwable;
 
 final class AMQPPeclChannel extends AMQPBaseChannel
 {
 	const NIL = 'nil';
 	const AMQP_NONE = AMQP_NOPARAM;
-
-	protected $exchangeList = array();
-	protected $queueList = array();
-	protected $opened = false;
-
-
-	/**
-	 * @var \AMQPChannel
-	 */
-	protected $link = null;
+    /**
+     * @var array
+     */
+	protected array $exchangeList = array();
+    /**
+     * @var array
+     */
+	protected array $queueList = array();
+    /**
+     * @var bool
+     */
+	protected bool $opened = false;
+    /**
+     * @var AMQPChannel|null
+     */
+	protected ?AMQPChannel $link = null;
 
 	/**
 	 * @var AMQPConsumer
 	**/
 	protected $consumer = null;
 
-	public function __construct($id, AMQPInterface $transport)
-	{
-		parent::__construct($id, $transport);
-	}
-
-	public function isOpen()
+    /**
+     * @return bool
+     */
+	public function isOpen(): bool
 	{
 		return $this->opened === true;
 	}
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function open()
+    /**
+     * @return static
+     */
+	public function open(): AMQPPeclChannel
 	{
 		$this->opened = true;
 
 		return $this;
 	}
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function close()
+    /**
+     * @return static
+     */
+	public function close(): AMQPPeclChannel
 	{
 		$this->opened = false;
 
 		return $this;
 	}
 
-	/**
-	 * @throws AMQPServerException|AMQPServerConnectionException
-	 * @param $deliveryTag string
-	 * @param bool $multiple
-	 * @return AMQPPeclChannel
-	 */
-	public function basicAck($deliveryTag, $multiple = false)
+    /**
+     * @param string $deliveryTag
+     * @param bool $multiple
+     * @return static
+     * @throws WrongArgumentException
+     * @throws AMQPServerConnectionException
+     * @throws AMQPServerException
+     */
+	public function basicAck(string $deliveryTag, bool $multiple = false): AMQPPeclChannel
 	{
 		try {
 			$obj = $this->lookupQueue(self::NIL);
@@ -94,7 +107,7 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 					? AMQP_MULTIPLE
 					: self::AMQP_NONE
 			);
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -104,31 +117,29 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 		}
 
-		$this->checkCommandResult(
-			$result,
-			"Could not ack message"
-		);
-
-		return $this;
+		return $this
+            ->checkCommandResult($result, "Could not ack message");
 	}
 
-	/**
-	 * can't get $consumerTag
-	 * @throws AMQPServerException|AMQPServerConnectionException|WrongStateException
-	 * @param string $consumerTag
-	 * @return AMQPPeclChannel
-	 */
-	public function basicCancel($consumerTag)
+    /**
+     * @param string $consumerTag
+     * @return static
+     * @throws WrongArgumentException
+     * @throws WrongStateException
+     * @throws AMQPServerConnectionException
+     * @throws AMQPServerException
+     */
+	public function basicCancel(string $consumerTag): AMQPPeclChannel
 	{
-		if (!$this->consumer instanceof AMQPConsumer)
-			throw new WrongStateException();
+		if (!$this->consumer instanceof AMQPConsumer) {
+            throw new WrongStateException();
+        }
 
 		try {
 			$obj = $this->lookupQueue($consumerTag);
 
 			$result = $obj->cancel($consumerTag);
-
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -138,18 +149,19 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 		}
 
-		$this->checkCommandResult(
-			$result,
-			"Could not cancel queue"
-		);
-
-		return $this;
+		return $this
+            ->checkCommandResult($result, "Could not cancel queue");
 	}
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function basicConsume($queue, $autoAck, AMQPConsumer $callback)
+    /**
+     * @param string $queue
+     * @param bool $autoAck
+     * @param AMQPConsumer $callback
+     * @return static
+     * @throws WrongArgumentException
+     * @throws AMQPServerException
+     */
+	public function basicConsume(string $queue, bool $autoAck, AMQPConsumer $callback): AMQPPeclChannel
 	{
 		Assert::isInstance($callback, AMQPPeclQueueConsumer::class);
 
@@ -173,7 +185,7 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 					? AMQP_AUTOACK
 					: self::AMQP_NONE
 			);
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -186,11 +198,15 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 		return $this;
 	}
 
-	/**
-	 * @throws AMQPServerException|AMQPServerConnectionException|ObjectNotFoundException
-	 * @return AMQPIncomingMessage
-	**/
-	public function basicGet($queue, $autoAck = true)
+    /**
+     * @param string $queue
+     * @param bool $autoAck
+     * @return AMQPIncomingMessage
+     * @throws ObjectNotFoundException
+     * @throws WrongArgumentException
+     * @throws AMQPServerException
+     */
+	public function basicGet(string $queue, bool $autoAck = true): AMQPIncomingMessage
 	{
 		try {
 			$obj = $this->lookupQueue($queue);
@@ -199,7 +215,7 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 					? AMQP_AUTOACK
 					: self::AMQP_NONE
 			);
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -209,24 +225,24 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 		}
 
-		if (!$message)
-			throw new ObjectNotFoundException(
-				"AMQP queue with name '{$queue}' is empty"
-			);
+		if (!$message) {
+            throw new ObjectNotFoundException("AMQP queue with name '{$queue}' is empty");
+        }
 
 		return AMQPPeclIncomingMessageAdapter::convert($message);
 	}
 
-	/**
-	 * @throws AMQPServerException|AMQPServerConnectionException
-	 * @param string $exchange
-	 * @param string $routingKey
-	 * @param AMQPOutgoingMessage $msg
-	 * @return AMQPPeclChannel
-	 */
-	public function basicPublish(
-		$exchange, $routingKey, AMQPOutgoingMessage $msg
-	) {
+    /**
+     * @param string $exchange
+     * @param string $routingKey
+     * @param AMQPOutgoingMessage $msg
+     * @return static
+     * @throws WrongArgumentException
+     * @throws AMQPServerConnectionException
+     * @throws AMQPServerException
+     */
+	public function basicPublish(string $exchange, string $routingKey, AMQPOutgoingMessage $msg): AMQPPeclChannel
+    {
 		try {
 			$obj = $this->lookupExchange($exchange);
 
@@ -236,7 +252,7 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 				$msg->getBitmask(new AMQPPeclOutgoingMessageBitmask()),
 				$msg->getProperties()
 			);
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -246,27 +262,26 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 		}
 
-		$this->checkCommandResult(
-			$result,
-			"Could not publish to exchange"
-		);
-
-		return $this;
+		return $this
+            ->checkCommandResult($result, "Could not publish to exchange");
 	}
 
-	/**
-	 * @param int $prefetchSize
-	 * @param int $prefetchCount
-	 * @return AMQPPeclChannel
-	 */
-	public function basicQos($prefetchSize, $prefetchCount)
+    /**
+     * @param int $prefetchSize
+     * @param int $prefetchCount
+     * @return static
+     * @throws WrongArgumentException
+     * @throws AMQPServerConnectionException
+     * @throws AMQPServerException
+     */
+	public function basicQos(int $prefetchSize, int $prefetchCount): AMQPPeclChannel
 	{
 		try {
 			$result = $this->getChannelLink()->qos(
 				$prefetchSize,
 				$prefetchCount
 			);
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -276,22 +291,20 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 		}
 
-		$this->checkCommandResult(
-			$result,
-			"Could not publish to exchange"
-		);
-
-		return $this;
+		return $this
+            ->checkCommandResult($result, "Could not publish to exchange");
 	}
 
-	/**
-	 * @throws AMQPServerException|AMQPServerConnectionException
-	 * @param string $destinationName
-	 * @param string $sourceName
-	 * @param string $routingKey
-	 * @return AMQPPeclChannel
-	 */
-	public function exchangeBind($destinationName, $sourceName, $routingKey)
+    /**
+     * @param string $destinationName
+     * @param string $sourceName
+     * @param string $routingKey
+     * @return static
+     * @throws WrongArgumentException
+     * @throws AMQPServerConnectionException
+     * @throws AMQPServerException
+     */
+	public function exchangeBind(string $destinationName, string $sourceName, string $routingKey): AMQPPeclChannel
 	{
 		try {
 			$obj = $this->lookupExchange($destinationName);
@@ -300,7 +313,7 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 				$sourceName,
 				$routingKey
 			);
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -310,37 +323,43 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 		}
 
-		$this->checkCommandResult(
-			$result,
-			"Could not bind exchange"
-		);
-
-		return $this;
+		return $this
+            ->checkCommandResult($result, "Could not bind exchange");
 	}
 
-	public function exchangeUnbind($destinationName, $sourceName, $routingKey)
+    /**
+     * @param string $destinationName
+     * @param string $sourceName
+     * @param string $routingKey
+     * @return AMQPPeclChannel
+     * @throws UnimplementedFeatureException
+     */
+	public function exchangeUnbind(string $destinationName, string $sourceName, string $routingKey): AMQPPeclChannel
 	{
 		throw new UnimplementedFeatureException();
 	}
 
-	/**
-	 * @throws AMQPServerException|AMQPServerConnectionException
-	 * @param string $name
-	 * @param AMQPExchangeConfig $conf
-	 * @return AMQPPeclChannel
-	 */
-	public function exchangeDeclare($name, AMQPExchangeConfig $conf)
+    /**
+     * @param string $name
+     * @param AMQPExchangeConfig $conf
+     * @return static
+     * @throws WrongArgumentException
+     * @throws AMQPServerConnectionException
+     * @throws AMQPServerException
+     */
+	public function exchangeDeclare(string $name, AMQPExchangeConfig $conf): AMQPPeclChannel
 	{
 		$this->checkConnection();
 
-		if (!$conf->getType() instanceof AMQPExchangeType)
-			throw new WrongArgumentException(
-				"AMQP exchange type is not set"
-			);
+		if (!$conf->getType() instanceof AMQPExchangeType) {
+            throw new WrongArgumentException(
+                "AMQP exchange type is not set"
+            );
+        }
 
 		try {
 			$this->exchangeList[$name] =
-				new \AMQPExchange($this->getChannelLink());
+				new AMQPExchange($this->getChannelLink());
 
 			$obj = $this->exchangeList[$name];
 
@@ -351,8 +370,8 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 			$obj->setArguments($conf->getArguments());
 
-			$result = $obj->declare();
-		} catch (\Exception $e) {
+			$result = $obj->declareExchange();
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -362,30 +381,30 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 		}
 
-		$this->checkCommandResult(
-			$result,
-			"Could not declare exchange"
-		);
-
-		return $this;
+		return  $this
+            ->checkCommandResult($result, "Could not declare exchange");
 	}
 
-	/**
-	 * @throws AMQPServerException|AMQPServerConnectionException
-	 * @return AMQPChannelInterface
-	**/
-	public function exchangeDelete(
-		$name, $ifUnused = false
-	) {
+    /**
+     * @param string $name
+     * @param bool $ifUnused
+     * @return static
+     * @throws WrongArgumentException
+     * @throws AMQPServerConnectionException
+     * @throws AMQPServerException
+     */
+	public function exchangeDelete(string $name, bool $ifUnused = false): AMQPPeclChannel
+    {
 		$bitmask = self::AMQP_NONE;
 
-		if ($ifUnused)
-			$bitmask = $bitmask | AMQP_IFUNUSED;
+		if ($ifUnused) {
+            $bitmask = $bitmask | AMQP_IFUNUSED;
+        }
 
 		try {
 			$obj = $this->lookupExchange($name);
 			$result = $obj->delete($name, $bitmask);
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -395,26 +414,26 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 		}
 
-		$this->checkCommandResult(
-			$result,
-			"Could not delete exchange"
-		);
-
-		$this->unsetExchange($name);
-
-		return $this;
+		return $this
+            ->checkCommandResult($result, "Could not delete exchange")
+            ->unsetExchange($name);
 	}
 
-	/**
-	 * @throws AMQPServerException|AMQPServerConnectionException
-	 * @return AMQPChannelInterface
-	**/
-	public function queueBind($name, $exchange, $routingKey)
+    /**
+     * @param string $name
+     * @param string $exchange
+     * @param string $routingKey
+     * @return static
+     * @throws WrongArgumentException
+     * @throws AMQPServerConnectionException
+     * @throws AMQPServerException
+     */
+	public function queueBind(string $name, string $exchange, string $routingKey): AMQPPeclChannel
 	{
 		try {
 			$obj = $this->lookupQueue($name);
 			$result = $obj->bind($exchange, $routingKey);
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -424,28 +443,29 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 		}
 
-		$this->checkCommandResult(
-			$result,
-			"Could not bind queue"
-		);
-
-		return $this;
+		return $this
+            ->checkCommandResult($result, "Could not bind queue");
 	}
 
-	/**
-	 * @throws AMQPServerException|AMQPServerConnectionException
-	 * @return integer - the message count in queue
-	**/
-	public function queueDeclare($name, AMQPQueueConfig $conf)
+    /**
+     * @param string $name
+     * @param AMQPQueueConfig $conf
+     * @return int
+     * @throws WrongArgumentException
+     * @throws AMQPServerConnectionException
+     * @throws AMQPServerException
+     */
+	public function queueDeclare(string $name, AMQPQueueConfig $conf): int
 	{
 		$this->checkConnection();
 
 		try {
-			if (isset($this->queueList[$name]))
-				unset($this->queueList[$name]);
+			if (isset($this->queueList[$name])) {
+                unset($this->queueList[$name]);
+            }
 
 			$this->queueList[$name] =
-				new \AMQPQueue($this->getChannelLink());
+				new AMQPQueue($this->getChannelLink());
 
 			$obj = $this->queueList[$name];
 			$obj->setName($name);
@@ -454,8 +474,8 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 			$obj->setArguments($conf->getArguments());
 
-			$result = $obj->declare();
-		} catch (\Exception $e) {
+			$result = $obj->declareQueue();
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -465,24 +485,24 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 		}
 
-		$this->checkCommandResult(
-			is_int($result),
-			"Could not declare queue"
-		);
+		$this->checkCommandResult(is_int($result),"Could not declare queue");
 
 		return $result;
 	}
 
-	/**
-	 * @throws AMQPServerException|AMQPServerConnectionException
-	 * @return AMQPChannelInterface
-	**/
-	public function queueDelete($name)
+    /**
+     * @param string $name
+     * @return static
+     * @throws WrongArgumentException
+     * @throws AMQPServerConnectionException
+     * @throws AMQPServerException
+     */
+	public function queueDelete(string $name): AMQPPeclChannel
 	{
 		try {
 			$obj = $this->lookupQueue($name);
 			$result = $obj->delete();
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -492,26 +512,24 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 		}
 
-		$this->checkCommandResult(
-			$result,
-			"Could not delete queue"
-		);
-
-		$this->unsetQueue($name);
-
-		return $this;
+		return $this
+            ->checkCommandResult($result, "Could not delete queue")
+            ->unsetQueue($name);
 	}
 
-	/**
-	 * @throws AMQPServerException|AMQPServerConnectionException
-	 * @return AMQPChannelInterface
-	**/
-	public function queuePurge($name)
+    /**
+     * @param string $name
+     * @return static
+     * @throws WrongArgumentException
+     * @throws AMQPServerConnectionException
+     * @throws AMQPServerException
+     */
+	public function queuePurge(string $name): AMQPPeclChannel
 	{
 		try {
 			$obj = $this->lookupQueue($name);
 			$result = $obj->purge();
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -521,24 +539,25 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 		}
 
-		$this->checkCommandResult(
-			$result,
-			"Could not purge queue"
-		);
-
-		return $this;
+		return $this
+            ->checkCommandResult($result, "Could not purge queue");
 	}
 
-	/**
-	 * @throws AMQPServerException|AMQPServerConnectionException
-	 * @return AMQPChannelInterface
-	**/
-	public function queueUnbind($name, $exchange, $routingKey)
+    /**
+     * @param string $name
+     * @param string $exchange
+     * @param string $routingKey
+     * @return static
+     * @throws WrongArgumentException
+     * @throws AMQPServerConnectionException
+     * @throws AMQPServerException
+     */
+	public function queueUnbind(string $name, string $exchange, string $routingKey): AMQPPeclChannel
 	{
 		try {
 			$obj = $this->lookupQueue($name);
 			$result = $obj->unbind($exchange, $routingKey);
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			$this->clearConnection();
 
 			throw new AMQPServerException(
@@ -548,75 +567,85 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 			);
 		}
 
-		$this->checkCommandResult(
-			$result,
-			"Could not unbind queue"
-		);
-
-		return $this;
+		return $this
+            ->checkCommandResult($result, "Could not unbind queue");
 	}
 
-	/**
-	 * @throws AMQPServerConnectionException
-	 * @return \AMQPExchange
-	**/
-	protected function lookupExchange($name)
+    /**
+     * @param string $name
+     * @return AMQPExchange
+     * @throws AMQPConnectionException
+     * @throws AMQPExchangeException
+     * @throws WrongArgumentException
+     */
+	protected function lookupExchange(string $name): AMQPExchange
 	{
 		$this->checkConnection();
 
 		if (!isset($this->exchangeList[$name])) {
 			$this->exchangeList[$name] =
-				new \AMQPExchange($this->getChannelLink());
+				new AMQPExchange($this->getChannelLink());
 			$this->exchangeList[$name]->setName($name);
 		}
 
 		return $this->exchangeList[$name];
 	}
 
-	/**
-	 * @return AMQPPeclChannel
-	**/
-	protected function unsetExchange($name)
+    /**
+     * @param string $name
+     * @return static
+     */
+	protected function unsetExchange(string $name): AMQPPeclChannel
 	{
-		if (isset($this->exchangeList[$name]))
-			unset($this->exchangeList[$name]);
+		if (isset($this->exchangeList[$name])) {
+            unset($this->exchangeList[$name]);
+        }
 
 		return $this;
 	}
 
-	/**
-	 * @throws AMQPServerConnectionException
-	 * @return \AMQPQueue
-	**/
-	protected function lookupQueue($name)
+    /**
+     * @param string $name
+     * @return AMQPQueue
+     * @throws AMQPConnectionException
+     * @throws AMQPQueueException
+     * @throws WrongArgumentException
+     */
+	protected function lookupQueue(string $name): AMQPQueue
 	{
 		$this->checkConnection();
 
 		if (!isset($this->queueList[$name])) {
-			$this->queueList[$name] = new \AMQPQueue($this->getChannelLink());
-			if ($name != self::NIL)
-					$this->queueList[$name]->setName($name);
+			$this->queueList[$name] = new AMQPQueue($this->getChannelLink());
+			if ($name != self::NIL) {
+                $this->queueList[$name]->setName($name);
+            }
 		}
 
 		return $this->queueList[$name];
 	}
 
-	/**
-	 * @return AMQPPeclChannel
-	**/
-	protected function unsetQueue($name)
+    /**
+     * @param string $name
+     * @return static
+     */
+	protected function unsetQueue(string $name): AMQPPeclChannel
 	{
-		if (isset($this->queueList[$name]))
-			unset($this->queueList[$name]);
+		if (isset($this->queueList[$name])) {
+            unset($this->queueList[$name]);
+        }
 
 		return $this;
 	}
 
-	/**
-	 * @throws AMQPServerConnectionException
-	 * @return AMQPPeclChannel
-	**/
-	protected function checkCommandResult($boolean, $message)
+    /**
+     * @param bool $boolean
+     * @param string $message
+     * @return static
+     * @throws WrongArgumentException
+     * @throws AMQPServerConnectionException
+     */
+	protected function checkCommandResult(bool $boolean, string $message): AMQPPeclChannel
 	{
 		if ($boolean !== true) {
 			//link is not alive!!!
@@ -627,7 +656,10 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 		return $this;
 	}
 
-	protected function clearConnection()
+    /**
+     * @return static
+     */
+	protected function clearConnection(): AMQPPeclChannel
 	{
 		unset($this->link);
 		$this->link = null;
@@ -638,10 +670,15 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 		return $this;
 	}
 
-	protected function getChannelLink()
+    /**
+     * @return AMQPChannel
+     * @throws WrongArgumentException
+     * @throws AMQPConnectionException
+     */
+	protected function getChannelLink(): AMQPChannel
 	{
-		if (!$this->link) {
-			$this->link = new \AMQPChannel(
+		if (null === $this->link) {
+			$this->link = new AMQPChannel(
 				$this->getTransport()->getLink()
 			);
 		}
@@ -649,13 +686,11 @@ final class AMQPPeclChannel extends AMQPBaseChannel
 		return $this->link;
 	}
 
-	/**
-	 * we dont know if connection is boken until request is made
-	 * @return AMQPPeclChannel
-	 */
-	protected function checkConnection()
+    /**
+     * @return static
+     */
+	protected function checkConnection(): AMQPPeclChannel
 	{
 		return $this;
 	}
 }
-?>

@@ -30,21 +30,21 @@ use OnPHP\Tests\TestEnvironment\TestCase;
 
 class AMQPTestCaseNoAckQueueConsumer extends AMQPPeclQueueConsumer
 {
-	protected $checkString = '';
+	protected string $checkString = '';
 
-	public function handleCancelOk($consumerTag)
+	public function handleCancelOk(string $consumerTag): void
 	{
 		$this->checkString .= 'C';
 	}
 
-	public function handleConsumeOk($consumerTag)
+	public function handleConsumeOk(string $consumerTag): void
 	{
 		$this->checkString .= 'A';
 
 		AMQPPeclTest::checkMessageCount($this->getChannel());
 	}
 
-	public function handleDelivery(AMQPIncomingMessage $delivery)
+	public function handleDelivery(AMQPIncomingMessage $delivery): bool
 	{
 		AMQPPeclTest::messageTest($delivery, $this->count);
 
@@ -57,48 +57,46 @@ class AMQPTestCaseNoAckQueueConsumer extends AMQPPeclQueueConsumer
 		return parent::handleDelivery($delivery);
 	}
 
-	public function getCheckString()
+	public function getCheckString(): string
 	{
 		return $this->checkString;
 	}
 
-	public function handleChangeConsumerTag($fromTag, $toTag)
+	public function handleChangeConsumerTag(string $fromTag, string $toTag): void
 	{
-		return;
 	}
 }
 
 class AMQPTestCaseAutoAckQueueConsumer extends AMQPPeclQueueConsumer
 {
-	protected $checkString = '';
+	protected string $checkString = '';
 
-	public function handleCancelOk($consumerTag)
+	public function handleCancelOk(string $consumerTag): void
 	{
 		$this->checkString .= 'C';
 	}
 
-	public function handleConsumeOk($consumerTag)
+	public function handleConsumeOk(string $consumerTag): void
 	{
 		$this->checkString .= 'A';
 
 		AMQPPeclTest::checkMessageCount($this->getChannel());
 	}
 
-	public function handleDelivery(AMQPIncomingMessage $delivery)
+	public function handleDelivery(AMQPIncomingMessage $delivery): bool
 	{
 		AMQPPeclTest::messageTest($delivery, $this->count);
 
 		return parent::handleDelivery($delivery);
 	}
 
-	public function getCheckString()
+	public function getCheckString(): string
 	{
 		return $this->checkString;
 	}
 
-	public function handleChangeConsumerTag($fromTag, $toTag)
+	public function handleChangeConsumerTag(string $fromTag, string $toTag): void
 	{
-		return;
 	}
 }
 
@@ -116,7 +114,7 @@ class AMQPPeclTest extends TestCase
 	 */
 	const PORT_MIRRORED = 5673; // port of slave node
 
-	protected static $queueList = array(
+	protected static array $queueList = array(
 		// basic queue
 		'basic' => array(
 			'exchange' => AMQPPeclTestExchange::class,
@@ -143,7 +141,7 @@ class AMQPPeclTest extends TestCase
 		)
 	);
 
-	protected function setUp(): void
+    protected function setUp(): void
 	{
 		if (!extension_loaded('amqp')) {
 			$this->markTestSkipped(

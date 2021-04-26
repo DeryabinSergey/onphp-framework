@@ -12,6 +12,7 @@
 namespace OnPHP\Main\Util\AMQP;
 
 use OnPHP\Core\Base\Assert;
+use OnPHP\Core\Exception\WrongArgumentException;
 
 final class AMQPIncomingMessage extends AMQPBaseMessage
 {
@@ -24,57 +25,79 @@ final class AMQPIncomingMessage extends AMQPBaseMessage
 	const CONSUMER_TAG = 'consumer_tag';
 	const REDELIVERED = 'redelivered';
 
-	protected $count = 0;
-	protected $routingKey = null;
-	protected $exchange = null;
-	protected $deliveryTag = null;
-	protected $redelivered = null;
-	protected $consumerTag = null;
+    /**
+     * @var int
+     */
+	protected int $count = 0;
+    /**
+     * @var string|null
+     */
+	protected ?string $routingKey = null;
+    /**
+     * @var string|null
+     */
+	protected ?string $exchange = null;
+    /**
+     * @var string|null
+     */
+	protected ?string $deliveryTag = null;
+    /**
+     * @var string|null
+     */
+	protected ?string $redelivered = null;
+    /**
+     * @var string|null
+     */
+	protected ?string $consumerTag = null;
 
-	protected static $mandatoryFields = array(
-		self::ROUTING_KEY, self::DELIVERY_TAG, self::EXCHANGE
-	);
+	protected static array $mandatoryFields = [
+		self::ROUTING_KEY,
+        self::DELIVERY_TAG,
+        self::EXCHANGE
+	];
 
-	/**
-	 * @return AMQPIncomingMessage
-	**/
-	public static function spawn(array $assoc)
+    /**
+     * @param array $assoc
+     * @return static
+     * @throws WrongArgumentException
+     */
+	public static function spawn(array $assoc): AMQPIncomingMessage
 	{
-		return self::create()->fill($assoc);
+		return static::create()->fill($assoc);
 	}
 
-	/**
-	 * @return AMQPIncomingMessage
-	**/
-	public static function create()
-	{
-		return new self;
-	}
-
-	public function getRedelivered()
+    /**
+     * @return string|null
+     */
+	public function getRedelivered(): ?string
 	{
 		return $this->redelivered;
 	}
 
-	/**
-	 * @return AMQPIncomingMessage
-	**/
-	public function setRedelivered($redelivered)
+    /**
+     * @param string $redelivered
+     * @return static
+     */
+	public function setRedelivered(string $redelivered): AMQPIncomingMessage
 	{
 		$this->redelivered = $redelivered;
 
 		return $this;
 	}
 
-	public function getConsumerTag()
+    /**
+     * @return ?string
+     */
+	public function getConsumerTag(): string
 	{
 		return $this->consumerTag;
 	}
 
-	/**
-	 * @return AMQPIncomingMessage
-	**/
-	public function setConsumerTag($consumerTag)
+    /**
+     * @param string $consumerTag
+     * @return static
+     */
+	public function setConsumerTag(string $consumerTag): AMQPIncomingMessage
 	{
 		$this->consumerTag = $consumerTag;
 
@@ -86,70 +109,88 @@ final class AMQPIncomingMessage extends AMQPBaseMessage
 		return $this->count;
 	}
 
-	/**
-	 * @return AMQPIncomingMessage
-	**/
-	public function setCount($count)
+    /**
+     * @param int $count
+     * @return static
+     */
+	public function setCount(int $count): AMQPIncomingMessage
 	{
 		$this->count = $count;
 
 		return $this;
 	}
 
-	public function getRoutingKey()
+    /**
+     * @return string|null
+     */
+	public function getRoutingKey(): ?string
 	{
 		return $this->routingKey;
 	}
 
-	/**
-	 * @return AMQPIncomingMessage
-	**/
-	public function setRoutingKey($routingKey)
+    /**
+     * @param string $routingKey
+     * @return static
+     */
+	public function setRoutingKey(string $routingKey): AMQPIncomingMessage
 	{
 		$this->routingKey = $routingKey;
 
 		return $this;
 	}
 
-	public function getExchange()
+    /**
+     * @return string|null
+     */
+	public function getExchange(): ?string
 	{
 		return $this->exchange;
 	}
 
-	/**
-	 * @return AMQPIncomingMessage
-	**/
-	public function setExchange($exchange)
+    /**
+     * @param string $exchange
+     * @return static
+     */
+	public function setExchange(string $exchange): AMQPIncomingMessage
 	{
 		$this->exchange = $exchange;
 
 		return $this;
 	}
 
-	public function getDeliveryTag()
+    /**
+     * @return string|null
+     */
+	public function getDeliveryTag(): ?string
 	{
 		return $this->deliveryTag;
 	}
 
-	/**
-	 * @return AMQPIncomingMessage
-	**/
-	public function setDeliveryTag($deliveryTag)
+    /**
+     * @param string $deliveryTag
+     * @return static
+     */
+	public function setDeliveryTag(string $deliveryTag): AMQPIncomingMessage
 	{
 		$this->deliveryTag = $deliveryTag;
 
 		return $this;
 	}
 
-	public function isEmptyQueue()
+    /**
+     * @return bool
+     */
+	public function isEmptyQueue(): bool
 	{
 		return $this->count == -1;
 	}
 
-	/**
-	 * @return AMQPIncomingMessage
-	**/
-	protected function fill(array $assoc)
+    /**
+     * @param array $assoc
+     * @return static
+     * @throws WrongArgumentException
+     */
+	protected function fill(array $assoc): AMQPIncomingMessage
 	{
 		$this->checkMandatory($assoc);
 
@@ -194,7 +235,12 @@ final class AMQPIncomingMessage extends AMQPBaseMessage
 		return $this;
 	}
 
-	protected function checkMandatory(array $assoc)
+    /**
+     * @param array $assoc
+     * @return static
+     * @throws WrongArgumentException
+     */
+	protected function checkMandatory(array $assoc): AMQPIncomingMessage
 	{
 		foreach (self::$mandatoryFields as $field) {
 			Assert::isIndexExists(
@@ -205,4 +251,3 @@ final class AMQPIncomingMessage extends AMQPBaseMessage
 		return $this;
 	}
 }
-?>

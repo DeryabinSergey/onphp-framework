@@ -15,4 +15,3 @@ use OnPHP\Core\Exception\BaseException;
 
 
 class AMQPServerException extends BaseException {/**/}
-?>

@@ -16,54 +16,50 @@ namespace OnPHP\Main\Util\AMQP;
 **/
 final class AMQPExchangeConfig extends AMQPBaseConfig
 {
-	protected $internal = null;
+    /**
+     * @var bool|null
+     */
+	protected ?bool $internal = null;
+    /**
+     * @var AMQPExchangeType|null
+     */
+	protected ?AMQPExchangeType $type = null;
 
-	/**
-	 * @var AMQPExchangeType
-	**/
-	protected $type = null;
-
-	/**
-	 * @return AMQPExchangeConfig
-	**/
-	public static function create()
-	{
-		return new self();
-	}
-
-	/**
-	 * @param AMQPExchangeType $type
-	 * @return AMQPExchangeConfig
-	**/
-	public function setType(AMQPExchangeType $type)
+    /**
+     * @param AMQPExchangeType $type
+     * @return static
+     */
+	public function setType(AMQPExchangeType $type): AMQPExchangeConfig
 	{
 		$this->type = $type;
 
 		return $this;
 	}
 
-	/**
-	 * @return AMQPExchangeType
-	**/
-	public function getType()
+    /**
+     * @return AMQPExchangeType|null
+     */
+	public function getType(): ?AMQPExchangeType
 	{
 		return $this->type;
 	}
 
-	public function getInternal()
+    /**
+     * @return bool
+     */
+	public function getInternal(): bool
 	{
 		return $this->internal;
 	}
 
-	/**
-	 * @param boolean $internal
-	 * @return AMQPExchangeConfig
-	**/
-	public function setInternal($internal)
+    /**
+     * @param bool $internal
+     * @return static
+     */
+	public function setInternal(bool $internal): AMQPExchangeConfig
 	{
 		$this->internal = $internal;
 
 		return $this;
 	}		
 }
-?>

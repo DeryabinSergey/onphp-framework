@@ -12,6 +12,9 @@
 namespace OnPHP\Main\Util\AMQP\Pecl;
 
 use OnPHP\Core\Base\Assert;
+use OnPHP\Core\Exception\UnimplementedFeatureException;
+use OnPHP\Core\Exception\WrongArgumentException;
+use OnPHP\Main\Util\AMQP\AMQPBaseConfig;
 use OnPHP\Main\Util\AMQP\AMQPExchangeConfig;
 
 /**
@@ -19,16 +22,22 @@ use OnPHP\Main\Util\AMQP\AMQPExchangeConfig;
 **/
 final class AMQPPeclExchangeBitmask extends AMQPPeclBaseBitmask
 {
-	public function getBitmask($config)
+    /**
+     * @param AMQPBaseConfig $config
+     * @return int
+     * @throws UnimplementedFeatureException
+     * @throws WrongArgumentException
+     */
+	public function getBitmask(AMQPBaseConfig $config): int
 	{
 		Assert::isInstance($config, AMQPExchangeConfig::class);
 
 		$bitmask = parent::getBitmask($config);
 
-		if ($config->getInternal())
-			$bitmask = $bitmask | AMQP_INTERNAL;
+		if ($config->getInternal()) {
+            $bitmask = $bitmask | AMQP_INTERNAL;
+        }
 
 		return $bitmask;
 	}
 }
-?>

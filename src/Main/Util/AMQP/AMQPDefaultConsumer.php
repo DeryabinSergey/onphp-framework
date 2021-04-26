@@ -13,114 +13,130 @@ namespace OnPHP\Main\Util\AMQP;
 
 abstract class AMQPDefaultConsumer implements AMQPConsumer
 {
-	/**
-	 * @var AMQPChannelInterface
-	**/
-	protected $channel = null;
-	protected $consumerTag = null;
-	protected $autoAcknowledge = false;
-	protected $queueName = null;
+    /**
+     * @var AMQPChannelInterface|null
+     */
+	protected ?AMQPChannelInterface $channel = null;
+	protected ?string $consumerTag = null;
+	protected ?bool $autoAcknowledge = false;
+	protected ?string $queueName = null;
 
+    /**
+     * AMQPDefaultConsumer constructor.
+     * @param AMQPChannelInterface $channel
+     */
 	public function __construct(AMQPChannelInterface $channel)
 	{
 		$this->channel = $channel;
 	}
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function getChannel()
+    /**
+     * @return AMQPChannelInterface|null
+     */
+	public function getChannel(): ?AMQPChannelInterface
 	{
 		return $this->channel;
 	}
 
-	/**
-	 * @param $consumerTag
-	 * @return AMQPConsumer
-	**/
-	public function setConsumerTag($consumerTag)
+    /**
+     * @param string $consumerTag
+     * @return static
+     */
+	public function setConsumerTag(string $consumerTag): AMQPDefaultConsumer
 	{
 		$this->consumerTag = $consumerTag;
 
 		return $this;
 	}
 
-	public function getConsumerTag()
+    /**
+     * @return string
+     */
+	public function getConsumerTag(): string
 	{
 		return $this->consumerTag;
 	}
 
-	/**
-	 * @return void
-	**/
-	public function handleConsumeOk($consumerTag)
+    /**
+     * @param string $consumerTag
+     */
+	public function handleConsumeOk(string $consumerTag): void
 	{
 		// no work to do
 	}
 
-	/**
-	 * @return void
-	**/
-	public function handleCancelOk($consumerTag)
+    /**
+     * @param string $consumerTag
+     */
+	public function handleCancelOk(string $consumerTag): void
 	{
 		// no work to do
 	}
 
-	/**
-	 * @return void
-	**/
-	public function handleDelivery(AMQPIncomingMessage $delivery)
+    /**
+     * @param AMQPIncomingMessage $delivery
+     * @return bool
+     */
+	public function handleDelivery(AMQPIncomingMessage $delivery): bool
 	{
 		// no work to do
 	}
 
-	/**
-	 * @return void
-	**/
-	public function handleChangeConsumerTag($fromTag, $toTag)
+    /**
+     * @param string $fromTag
+     * @param string $toTag
+     */
+	public function handleChangeConsumerTag(string $fromTag, string $toTag): void
 	{
 		// no work to do
 	}
 
-	/**
-	 * @return AMQPDefaultConsumer
-	**/
-	public function setQueueName($name)
+    /**
+     * @param string $name
+     * @return static
+     */
+	public function setQueueName(string $name): AMQPDefaultConsumer
 	{
 		$this->queueName = $name;
 
 		return $this;
 	}
 
-	/**
-	 * @return string
-	 **/
-	public function getQueueName()
+    /**
+     * @return string|null
+     */
+	public function getQueueName(): ?string
 	{
 		return $this->queueName;
 	}
 
-	/**
-	 * @return AMQPDefaultConsumer
-	**/
-	public function setAutoAcknowledge($boolean)
+    /**
+     * @param bool $boolean
+     * @return static
+     */
+	public function setAutoAcknowledge(bool $boolean): AMQPDefaultConsumer
 	{
 		$this->autoAcknowledge = ($boolean === true);
 
 		return $this;
 	}
 
-	public function isAutoAcknowledge()
+    /**
+     * @return bool
+     */
+	public function isAutoAcknowledge(): bool
 	{
 		return $this->autoAcknowledge;
 	}
 
-	/**
-	 * @return AMQPIncomingMessage
-	**/
-	public function getNextDelivery()
+    /**
+     * @return AMQPIncomingMessage|null
+     */
+	public function getNextDelivery(): ?AMQPIncomingMessage
 	{
-		return $this->channel->getNextDelivery();
+		return
+            $this->channel instanceof AMQPChannelInterface
+                ? $this->channel->getNextDelivery()
+                : null;
 	}
 }
-?>

@@ -13,78 +13,74 @@ namespace OnPHP\Main\Util\AMQP;
 
 interface AMQPConsumer
 {
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function getChannel();
+    /**
+     * @return AMQPChannelInterface
+     */
+	public function getChannel(): ?AMQPChannelInterface;
 
-	/**
-	 * Called when a delivery appears for this consumer.
-	 * @param AMQPIncomingMessage $delivery
-	 * @return void
-	**/
-	public function handleDelivery(AMQPIncomingMessage $delivery);
+    /**
+     * Called when a delivery appears for this consumer.
+     * @param AMQPIncomingMessage $delivery
+     * @return bool
+     */
+	public function handleDelivery(AMQPIncomingMessage $delivery): bool;
 
-	/**
-	 * Called when the consumer is first registered by a call
-	 * to {@link Channel#basicConsume}.
-	 *
-	 * @param consumerTag the defined consumerTag
-	 * @return void
-	**/
-	public function handleConsumeOk($consumerTag);
+    /**
+     * Called when the consumer is first registered by a call
+     * to {@link Channel#basicConsume}.
+     * @param string $consumerTag the defined consumerTag
+     */
+	public function handleConsumeOk(string $consumerTag): void;
 
-	/**
-	 * Called when the consumer is deregistered by a call
-	 * to {@link Channel#basicCancel}.
-	 *
-	 * @param consumerTag the defined consumerTag
-	 * @return void
-	**/
-	public function handleCancelOk($consumerTag);
+    /**
+     * Called when the consumer is deregistered by a call
+     * to {@link Channel#basicCancel}.
+     * @param string $consumerTag
+     */
+	public function handleCancelOk(string $consumerTag): void;
 
-	/**
-	 * Called when the consumer is changed tag
-	 *
-	 * @param string $fromTag
-	 * @param string $toTag
-	 * @return void
-	**/
-	public function handleChangeConsumerTag($fromTag, $toTag);
+    /**
+     * Called when the consumer is changed tag
+     * @param string $fromTag
+     * @param string $toTag
+     */
+	public function handleChangeConsumerTag(string $fromTag, string $toTag): void;
 
-	/**
-	 * @return AMQPConsumer
-	**/
-	public function setQueueName($name);
+    /**
+     * @param string $name
+     * @return static
+     */
+	public function setQueueName(string $name): AMQPConsumer;
 
-	/**
-	 * @return string
-	**/
-	public function getQueueName();
+    /**
+     * @return string
+     */
+	public function getQueueName(): ?string;
 
-	/**
-	 * @return AMQPConsumer
-	**/
-	public function setAutoAcknowledge($boolean);
+    /**
+     * @param bool $boolean
+     * @return AMQPConsumer
+     */
+	public function setAutoAcknowledge(bool $boolean): AMQPConsumer;
 
-	/**
-	 * @return boolean
-	**/
-	public function isAutoAcknowledge();
+    /**
+     * @return bool
+     */
+	public function isAutoAcknowledge(): bool;
 
-	/**
-	 * @return AMQPConsumer
-	**/
-	public function setConsumerTag($consumerTag);
+    /**
+     * @param string $consumerTag
+     * @return static
+     */
+	public function setConsumerTag(string $consumerTag): AMQPConsumer;
 
-	/**
-	 * @return string
-	**/
-	public function getConsumerTag();
+    /**
+     * @return string
+     */
+	public function getConsumerTag(): string;
 
-	/**
-	 * @return AMQPIncomingMessage
-	**/
-	public function getNextDelivery();
+    /**
+     * @return ?AMQPIncomingMessage
+     */
+	public function getNextDelivery(): ?AMQPIncomingMessage;
 }
-?>

@@ -13,34 +13,30 @@ namespace OnPHP\Main\Util\AMQP;
 
 /**
  * @see http://www.rabbitmq.com/amqp-0-9-1-quickref.html#queue.declare
-**/
+ */
 final class AMQPQueueConfig extends AMQPBaseConfig
 {
-	protected $exclusive = false;
+    /**
+     * @var bool
+     */
+	protected bool $exclusive = false;
 
-	/**
-	 * @return AMQPQueueConfig
-	**/
-	public static function create()
-	{
-		return new self();
-	}
-
-	public function getExclusive()
+    /**
+     * @return bool
+     */
+	public function getExclusive(): bool
 	{
 		return $this->exclusive;
 	}
 
-	/**
-	 * @param boolean $exclusive
-	 * @return AMQPQueueConfig
-	**/
-	public function setExclusive($exclusive)
+    /**
+     * @param bool $exclusive
+     * @return static
+     */
+	public function setExclusive(bool $exclusive): AMQPQueueConfig
 	{
 		$this->exclusive = $exclusive === false;
 
 		return $this;
 	}
-
 }
-?>

@@ -5,6 +5,7 @@ services:
     - postgresql
     - redis-server
     - memcached
+    - rabbitmq
 php:
     - 7.4.6
     - 8.0.2
@@ -16,6 +17,7 @@ before_install:
           yes | pecl install memcache
         fi
     - no | pecl install memcached
+    - yes | pecl install amqp-1.10.2
     - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
     - mysql -e 'CREATE DATABASE onphp;'
     - psql -c 'create database onphp;' -U postgres
@@ -32,8 +34,6 @@ before_script:
     - sudo systemctl restart mysql
     - sudo mysql_upgrade
     - mysql --version
-    
-    
     - sudo apt-get install -q -y apache2 libapache2-mod-fastcgi
     - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
     - sudo a2enmod rewrite actions fastcgi alias
@@ -48,4 +48,4 @@ before_script:
     #- curl -vsf 'http://localhost/curlTest.php' &> /dev/stdout
     
 script:
-    - ./vendor/bin/phpunit --exclude-group amqp,cookie,mail,pinba --verbose --dont-report-useless-tests ./tests/AllTests.php
+    - ./vendor/bin/phpunit --exclude-group cookie,mail,pinba --verbose --dont-report-useless-tests ./tests/AllTests.php

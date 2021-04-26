@@ -12,4 +12,3 @@
 namespace OnPHP\Main\Util\AMQP\Exception;
 
 class AMQPServerConnectionException extends AMQPServerException {/**/}
-?>

@@ -11,30 +11,42 @@
 
 namespace OnPHP\Main\Util\AMQP\Pecl;
 
+use AMQPEnvelope;
+use OnPHP\Core\Exception\WrongArgumentException;
 use OnPHP\Main\Util\AMQP\AMQPDefaultConsumer;
 use OnPHP\Main\Util\AMQP\AMQPIncomingMessage;
 
 abstract class AMQPPeclQueueConsumer extends AMQPDefaultConsumer
 {
-	protected $cancel = false;
-	protected $count = 0;
-	protected $limit = 0;
+    /**
+     * @var bool
+     */
+	protected bool $cancel = false;
+    /**
+     * @var int
+     */
+	protected int $count = 0;
+    /**
+     * @var int
+     */
+	protected int $limit = 0;
 
-	/**
-	 * @param $cancel - type
-	 * @return AMQPPeclQueueConsumer
-	 */
-	public function setCancel($cancel)
+    /**
+     * @param bool $cancel
+     * @return static
+     */
+	public function setCancel(bool $cancel): AMQPPeclQueueConsumer
 	{
 		$this->cancel = ($cancel === true);
+
 		return $this;
 	}
 
-	/**
-	 * @param int $limit
-	 * @return AMQPPeclQueueConsumer
-	 */
-	public function setLimit($limit)
+    /**
+     * @param int $limit
+     * @return static
+     */
+	public function setLimit(int $limit): AMQPPeclQueueConsumer
 	{
 		$this->limit = $limit;
 		return $this;
@@ -43,12 +55,17 @@ abstract class AMQPPeclQueueConsumer extends AMQPDefaultConsumer
 	/**
 	 * @return int
 	 */
-	public function getCount()
-	{
+	public function getCount(): int
+    {
 		return $this->count;
 	}
 
-	public function handlePeclDelivery(\AMQPEnvelope $delivery, \AMQPQueue $queue = null)
+    /**
+     * @param AMQPEnvelope $delivery
+     * @return bool
+     * @throws WrongArgumentException
+     */
+	public function handlePeclDelivery(AMQPEnvelope $delivery): bool
 	{
 		$this->count++;
 
@@ -60,12 +77,17 @@ abstract class AMQPPeclQueueConsumer extends AMQPDefaultConsumer
 		);
 	}
 
-	public function handleDelivery(AMQPIncomingMessage $delivery)
+    /**
+     * @param AMQPIncomingMessage $delivery
+     * @return bool
+     */
+	public function handleDelivery(AMQPIncomingMessage $delivery): bool
 	{
 		if ($this->cancel) {
 			$this->handleCancelOk('');
 			return false;
 		}
+
+		return true;
 	}
 }
-?>

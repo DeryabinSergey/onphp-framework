@@ -11,28 +11,37 @@
 
 namespace OnPHP\Main\Util\AMQP\Pecl;
 
+use OnPHP\Main\Util\AMQP\AMQPBaseConfig;
 use OnPHP\Main\Util\AMQP\AMQPBitmaskResolver;
 use OnPHP\Core\Exception\UnimplementedFeatureException;
 
 abstract class AMQPPeclBaseBitmask implements AMQPBitmaskResolver
 {
-	public function getBitmask($config)
+    /**
+     * @param AMQPBaseConfig $config
+     * @return int
+     * @throws UnimplementedFeatureException
+     */
+	public function getBitmask(AMQPBaseConfig $config): int
 	{
+        if ($config->getNowait()) {
+            throw new UnimplementedFeatureException();
+        }
+
 		$bitmask = 0;
 
-		if ($config->getPassive())
-			$bitmask = $bitmask | AMQP_PASSIVE;
+		if ($config->getPassive()) {
+            $bitmask = $bitmask | AMQP_PASSIVE;
+        }
 
-		if ($config->getDurable())
-			$bitmask = $bitmask | AMQP_DURABLE;
+		if ($config->getDurable()) {
+            $bitmask = $bitmask | AMQP_DURABLE;
+        }
 
-		if ($config->getAutodelete())
-			$bitmask = $bitmask | AMQP_AUTODELETE;
-
-		if ($config->getNowait())
-			throw new UnimplementedFeatureException();
+		if ($config->getAutodelete()) {
+            $bitmask = $bitmask | AMQP_AUTODELETE;
+        }
 
 		return $bitmask;
 	}
 }
-?>

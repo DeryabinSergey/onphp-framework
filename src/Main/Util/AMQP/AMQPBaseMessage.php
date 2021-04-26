@@ -13,6 +13,7 @@ namespace OnPHP\Main\Util\AMQP;
 
 use OnPHP\Core\Base\Timestamp;
 use OnPHP\Core\Base\Assert;
+use OnPHP\Core\Exception\WrongArgumentException;
 
 /**
  * http://www.rabbitmq.com/amqp-0-9-1-reference.html#class.basic
@@ -38,23 +39,42 @@ abstract class AMQPBaseMessage
 	const PRIORITY_MIN = 0;
 	const PRIORITY_MAX = 9;
 
-	protected $properties = array();
-	protected $timestamp = null;
-	protected $body = null;
+	protected array $properties = array();
+	protected ?Timestamp $timestamp = null;
+	protected ?string $body = null;
 
-	public function getBody()
+    /**
+     * @return static
+     */
+    public static function create(): AMQPBaseMessage
+    {
+        return new static;
+    }
+
+    /**
+     * @return string|null
+     */
+	public function getBody(): ?string
 	{
 		return $this->body;
 	}
 
-	public function setBody($body)
+    /**
+     * @param string $body
+     * @return static
+     */
+	public function setBody(string $body): AMQPBaseMessage
 	{
 		$this->body = $body;
 
 		return $this;
 	}
 
-	public function getProperty($key)
+    /**
+     * @param string $key
+     * @return mixed|null
+     */
+	public function getProperty(string $key)
 	{
 		if (isset($this->properties[$key]))
 			return $this->properties[$key];
@@ -62,10 +82,11 @@ abstract class AMQPBaseMessage
 		return null;
 	}
 
-	/**
-	 * @return AMQPBaseMessage
-	**/
-	public function setProperties(array $assoc)
+    /**
+     * @param array $assoc
+     * @return static
+     */
+	public function setProperties(array $assoc): AMQPBaseMessage
 	{
 		$this->properties = $assoc;
 
@@ -76,103 +97,123 @@ abstract class AMQPBaseMessage
 		return $this;
 	}
 
-	public function getProperties()
+    /**
+     * @return array
+     */
+	public function getProperties(): array
 	{
 		return $this->properties;
 	}
 
-	/**
-	 * @return AMQPBaseMessage
-	**/
-	public function setContentType($string)
+    /**
+     * @param string $string
+     * @return static
+     */
+	public function setContentType(string $string): AMQPBaseMessage
 	{
 		$this->properties[self::CONTENT_TYPE] = $string;
 
 		return $this;
 	}
 
-	public function getContentType()
+    /**
+     * @return string|null
+     */
+	public function getContentType(): ?string
 	{
 		return $this->getProperty(self::CONTENT_TYPE);
 	}
 
-	/**
-	 * @return AMQPBaseMessage
-	**/
-	public function setContentEncoding($string)
+    /**
+     * @param string $string
+     * @return static
+     */
+	public function setContentEncoding(string $string): AMQPBaseMessage
 	{
 		$this->properties[self::CONTENT_ENCODING] = $string;
 
 		return $this;
 	}
 
-	public function getContentEncoding()
+    /**
+     * @return string|null
+     */
+	public function getContentEncoding(): ?string
 	{
 		return $this->getProperty(self::CONTENT_ENCODING);
 	}
 
-	/**
-	 * @return AMQPBaseMessage
-	**/
-	public function setMessageId($string)
+    /**
+     * @param string $string
+     * @return static
+     */
+	public function setMessageId(string $string): AMQPBaseMessage
 	{
 		$this->properties[self::MESSAGE_ID] = $string;
 
 		return $this;
 	}
 
-	public function getMessageId()
+    /**
+     * @return string|null
+     */
+	public function getMessageId(): ?string
 	{
 		return $this->getProperty(self::MESSAGE_ID);
 	}
 
-	/**
-	 * @return AMQPBaseMessage
-	**/
-	public function setUserId($string)
+    /**
+     * @param string $string
+     * @return static
+     */
+	public function setUserId(string $string): AMQPBaseMessage
 	{
 		$this->properties[self::USER_ID] = $string;
 
 		return $this;
 	}
 
-	public function getUserId()
+    /**
+     * @return string|null
+     */
+	public function getUserId(): ?string
 	{
 		return $this->getProperty(self::USER_ID);
 	}
 
-	/**
-	 * @return AMQPBaseMessage
-	**/
-	public function setAppId($string)
+    /**
+     * @param string $string
+     * @return static
+     */
+	public function setAppId(string $string): AMQPBaseMessage
 	{
 		$this->properties[self::APP_ID] = $string;
 
 		return $this;
 	}
 
-	public function getAppId()
+    /**
+     * @return string|null
+     */
+	public function getAppId(): ?string
 	{
 		return $this->getProperty(self::APP_ID);
 	}
 
-	/**
-	 * Non-persistent (1) or persistent (2).
-	 *
-	 * @return AMQPBaseMessage
-	**/
-	public function setDeliveryMode($int)
+    /**
+     * Non-persistent (1) or persistent (2).
+     * @param int $int
+     * @return static
+     * @throws WrongArgumentException
+     */
+	public function setDeliveryMode(int $int): AMQPBaseMessage
 	{
-		Assert::isInteger($int, __METHOD__.": requires integer, given {$int}");
-
-		Assert::isTrue(
-			in_array(
-				$int,
-				array(
-					self::DELIVERY_MODE_NONPERISISTENT,
-					self::DELIVERY_MODE_PERISISTENT
-				)
-			),
+		Assert::isIndexExists(
+		    array_fill_keys(
+		        [self::DELIVERY_MODE_NONPERISISTENT, self::DELIVERY_MODE_PERISISTENT],
+                true
+            ),
+			$int,
 			__METHOD__.": unknown mode {$int}"
 		);
 
@@ -181,20 +222,22 @@ abstract class AMQPBaseMessage
 		return $this;
 	}
 
-	public function getDeliveryMode()
+    /**
+     * @return int|null
+     */
+	public function getDeliveryMode(): ?int
 	{
 		return $this->getProperty(self::DELIVERY_MODE);
 	}
 
-	/**
-	 * Message priority from 0 to 9.
-	 *
-	 * @return AMQPBaseMessage
-	**/
-	public function setPriority($int)
+    /**
+     * Message priority from 0 to 9.
+     * @param int $int
+     * @return static
+     * @throws WrongArgumentException
+     */
+	public function setPriority(int $int): AMQPBaseMessage
 	{
-		Assert::isInteger($int, __METHOD__);
-
 		Assert::isTrue(
 			($int >= self::PRIORITY_MIN && $int <= self::PRIORITY_MAX),
 			__METHOD__
@@ -205,30 +248,38 @@ abstract class AMQPBaseMessage
 		return $this;
 	}
 
-	public function getPriority()
+    /**
+     * @return int|null
+     */
+	public function getPriority(): ?int
 	{
 		return $this->getProperty(self::PRIORITY);
 	}
 
-	/**
-	 * @return AMQPBaseMessage
-	**/
-	public function setCorrelationId($string)
+    /**
+     * @param string $string
+     * @return static
+     */
+	public function setCorrelationId(string $string): AMQPBaseMessage
 	{
 		$this->properties[self::CORRELATION_ID] = $string;
 
 		return $this;
 	}
 
-	public function getCorrelationId()
+    /**
+     * @return string|null
+     */
+	public function getCorrelationId(): ?string
 	{
 		return $this->getProperty(self::CORRELATION_ID);
 	}
 
-	/**
-	 * @return AMQPBaseMessage
-	**/
-	public function setTimestamp(Timestamp $datetime)
+    /**
+     * @param Timestamp $datetime
+     * @return static
+     */
+	public function setTimestamp(Timestamp $datetime): AMQPBaseMessage
 	{
 		$this->timestamp = $datetime;
 		$this->properties[self::TIMESTAMP] = $datetime->toStamp();
@@ -236,57 +287,68 @@ abstract class AMQPBaseMessage
 		return $this;
 	}
 
-	/**
-	 * @return Timestamp
-	**/
-	public function getTimestamp()
+    /**
+     * @return Timestamp|null
+     */
+	public function getTimestamp(): ?Timestamp
 	{
 		return $this->timestamp;
 	}
 
-	/**
-	 * @return AMQPBaseMessage
-	**/
-	public function setExpiration($string)
+    /**
+     * @param string $string
+     * @return static
+     */
+	public function setExpiration(string $string): AMQPBaseMessage
 	{
 		$this->properties[self::EXPIRATION] = $string;
 
 		return $this;
 	}
 
-	public function getExpiration()
+    /**
+     * @return string|null
+     */
+	public function getExpiration(): ?string
 	{
 		return $this->getProperty(self::EXPIRATION);
 	}
 
-	/**
-	 * @return AMQPBaseMessage
-	**/
-	public function setType($string)
+    /**
+     * @param string $string
+     * @return static
+     */
+	public function setType(string $string): AMQPBaseMessage
 	{
 		$this->properties[self::TYPE] = $string;
 
 		return $this;
 	}
 
-	public function getType()
+    /**
+     * @return string|null
+     */
+	public function getType(): ?string
 	{
 		return $this->getProperty(self::TYPE);
 	}
 
-	/**
-	 * @return AMQPBaseMessage
-	**/
-	public function setReplyTo($string)
+    /**
+     * @param string $string
+     * @return static
+     */
+	public function setReplyTo(string $string): AMQPBaseMessage
 	{
 		$this->properties[self::REPLY_TO] = $string;
 
 		return $this;
 	}
 
-	public function getReplyTo()
+    /**
+     * @return string|null
+     */
+	public function getReplyTo(): ?string
 	{
 		return $this->getProperty(self::REPLY_TO);
 	}		
 }
-?>

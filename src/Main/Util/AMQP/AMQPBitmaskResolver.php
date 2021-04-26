@@ -11,8 +11,14 @@
 
 namespace OnPHP\Main\Util\AMQP;
 
+use OnPHP\Core\Exception\UnimplementedFeatureException;
+
 interface AMQPBitmaskResolver
 {
-	public function getBitmask($config);
+    /**
+     * @param AMQPBaseConfig $config
+     * @return int
+     * @throws UnimplementedFeatureException
+     */
+	public function getBitmask(AMQPBaseConfig $config): int;
 }
-?>

@@ -11,6 +11,7 @@
 
 namespace OnPHP\Main\Util\AMQP;
 
+use OnPHP\Core\Exception\WrongArgumentException;
 use OnPHP\Main\Util\AMQP\Exception\AMQPServerConnectionException;
 
 /**
@@ -18,14 +19,16 @@ use OnPHP\Main\Util\AMQP\Exception\AMQPServerConnectionException;
 **/
 abstract class AMQPBaseChannel implements AMQPChannelInterface
 {
-	protected $id = null;
+    /**
+     * @var int|null
+     */
+	protected ?int $id = null;
+    /**
+     * @var AMQPInterface|null
+     */
+	protected ?AMQPInterface $transport = null;
 
-	/**
-	 * @var AMQPInterface
-	**/
-	protected $transport = null;
-
-	public function __construct($id, AMQPInterface $transport)
+	public function __construct(int $id, AMQPInterface $transport)
 	{
 		$this->id = $id;
 		$this->transport = $transport;
@@ -33,33 +36,45 @@ abstract class AMQPBaseChannel implements AMQPChannelInterface
 
 	public function __destruct()
 	{
-		if ($this->isOpen())
-			$this->close();
+		if ($this->isOpen()) {
+            $this->close();
+        }
 	}
 
-	public function getTransport()
+    /**
+     * @return AMQPInterface
+     */
+	public function getTransport(): AMQPInterface
 	{
 		return $this->transport;
 	}
 
-	public function getId()
+    /**
+     * @return int|null
+     */
+	public function getId(): ?int
 	{
 		return $this->id;
 	}
 
-	/**
-	 * @throws AMQPServerConnectionException
-	 * @return AMQPBaseChannel
-	**/
-	protected function checkConnection()
+    /**
+     * @return static
+     * @throws AMQPServerConnectionException
+     */
+	protected function checkConnection(): AMQPBaseChannel
 	{
-		if (!$this->transport->getLink()->isConnected()) {
-			throw new AMQPServerConnectionException(
-				"No connection available"
-			);
-		}
+	    $isConnected = false;
+	    try {
+	        $isConnected =
+                !$this->transport instanceof AMQPInterface
+                || !$this->transport->getLink()
+                || !$this->transport->getLink()->isConnected();
+        } catch (WrongArgumentException $exception) { /**  */ }
+
+        if (!$isConnected) {
+            throw new AMQPServerConnectionException("No connection available");
+        }
 
 		return $this;
 	}
 }
-?>

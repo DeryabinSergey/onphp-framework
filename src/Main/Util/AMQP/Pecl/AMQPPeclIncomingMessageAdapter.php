@@ -11,16 +11,19 @@
 
 namespace OnPHP\Main\Util\AMQP\Pecl;
 
+use AMQPEnvelope;
 use OnPHP\Core\Base\StaticFactory;
+use OnPHP\Core\Exception\WrongArgumentException;
 use OnPHP\Main\Util\AMQP\AMQPIncomingMessage;
 
 final class AMQPPeclIncomingMessageAdapter extends StaticFactory
 {
-	/**
-	 * @param \AMQPEnvelope $incoming
-	 * @return AMQPIncomingMessage
-	 */
-	public static function convert(\AMQPEnvelope $incoming)
+    /**
+     * @param AMQPEnvelope $incoming
+     * @return AMQPIncomingMessage
+     * @throws WrongArgumentException
+     */
+	public static function convert(AMQPEnvelope $incoming): AMQPIncomingMessage
 	{
 		$data = array(
 			AMQPIncomingMessage::APP_ID => $incoming->getAppId(),
@@ -39,7 +42,6 @@ final class AMQPPeclIncomingMessageAdapter extends StaticFactory
 			AMQPIncomingMessage::PRIORITY => $incoming->getPriority(),
 			AMQPIncomingMessage::REPLY_TO => $incoming->getReplyTo(),
 			AMQPIncomingMessage::REDELIVERED => $incoming->isRedelivery(),
-			AMQPIncomingMessage::PRIORITY => $incoming->getPriority(),
 			AMQPIncomingMessage::ROUTING_KEY => $incoming->getRoutingKey(),
 			AMQPIncomingMessage::TIMESTAMP => $incoming->getTimeStamp(),
 			AMQPIncomingMessage::TYPE => $incoming->getType(),
@@ -50,4 +52,3 @@ final class AMQPPeclIncomingMessageAdapter extends StaticFactory
 	}
 
 }
-?>

@@ -11,6 +11,9 @@
 
 namespace OnPHP\Main\Util\AMQP\Pecl;
 
+use AMQPConnection;
+use AMQPConnectionException;
+use Throwable;
 use OnPHP\Main\Util\AMQP\AMQP;
 use OnPHP\Main\Util\AMQP\AMQPCredentials;
 use OnPHP\Main\Util\AMQP\Exception\AMQPServerConnectionException;
@@ -21,6 +24,11 @@ use OnPHP\Main\Util\AMQP\AMQPInterface;
 **/
 final class AMQPPecl extends AMQP
 {
+    /**
+     * AMQPPecl constructor.
+     * @param AMQPCredentials $credentials
+     * @throws AMQPServerConnectionException
+     */
 	public function __construct(AMQPCredentials $credentials)
 	{
 		parent::__construct($credentials);
@@ -28,108 +36,102 @@ final class AMQPPecl extends AMQP
 		$this->fillCredentials();
 	}
 
-	/**
-	 * @return boolean
-	**/
-	public function isConnected()
+    /**
+     * @return bool
+     */
+	public function isConnected(): bool
 	{
 		try {
 			return $this->link->isConnected();
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			return false;
 		}
 	}
 
-	/**
-	 * @throws AMQPServerConnectionException
-	 * @return AMQP
-	**/
-	public function connect()
+    /**
+     * @return static
+     * @throws AMQPServerConnectionException
+     */
+	public function connect(): AMQPPecl
 	{
 		try {
-			if ($this->isConnected())
-				return $this;
+			if ($this->isConnected()) {
+                return $this;
+            }
 
 			$this->link->connect();
-
-		} catch (\AMQPConnectionException $e) {
+		} catch (AMQPConnectionException $e) {
 			$this->alive = false;
 
-			throw new AMQPServerConnectionException(
-				$e->getMessage(),
-				$e->getCode(),
-				$e
-			);
+			throw new AMQPServerConnectionException($e->getMessage(), $e->getCode(), $e);
 		}
 
 		return $this;
 	}
 
-	/**
-	 * @throws AMQPServerConnectionException
-	 * @return AMQP
-	**/
-	public function reconnect()
+    /**
+     * @return static
+     * @throws AMQPServerConnectionException
+     */
+	public function reconnect(): AMQPPecl
 	{
 		try {
 			$this->link->reconnect();
+
 			return $this;
-		} catch (\AMQPConnectionException $e) {
+		} catch (AMQPConnectionException $e) {
 			$this->alive = false;
 
-			throw new AMQPServerConnectionException(
-				$e->getMessage(),
-				$e->getCode(),
-				$e
-			);
+            throw new AMQPServerConnectionException($e->getMessage(), $e->getCode(), $e);
 		}
 	}
 
-	/**
-	 * @throws AMQPServerConnectionException
-	 * @return AMQP
-	**/
-	public function disconnect()
+    /**
+     * @return static
+     * @throws AMQPServerConnectionException
+     */
+	public function disconnect(): AMQPPecl
 	{
 		try {
 			if ($this->isConnected()) {
 				$this->link->disconnect();
-				return $this;
 			}
-		} catch (\AMQPConnectionException $e) {
+		} catch (AMQPConnectionException $e) {
 			$this->alive = false;
 
-			throw new AMQPServerConnectionException(
-				$e->getMessage(),
-				$e->getCode(),
-				$e
-			);
+            throw new AMQPServerConnectionException($e->getMessage(), $e->getCode(), $e);
 		}
+
+        return $this;
 	}
 
-	/**
-	 * @param mixed $id
-	 * @param AMQPInterface $transport
-	 * @return AMQPPeclChannel
-	**/
-	public function spawnChannel($id, AMQPInterface $transport)
+    /**
+     * @param int $id
+     * @param AMQPInterface $transport
+     * @return AMQPPeclChannel
+     */
+	public function spawnChannel(int $id, AMQPInterface $transport): AMQPPeclChannel
 	{
 		return new AMQPPeclChannel($id, $transport);
 	}
 
-	/**
-	 * @return AMQPPecl
-	**/
-	protected function fillCredentials()
+    /**
+     * @return static
+     * @throws AMQPServerConnectionException
+     */
+	protected function fillCredentials(): AMQPPecl
 	{
-		$this->link = new \AMQPConnection();
-		$this->link->setHost($this->credentials->getHost());
-		$this->link->setPort($this->credentials->getPort());
-		$this->link->setLogin($this->credentials->getLogin());
-		$this->link->setPassword($this->credentials->getPassword());
-		$this->link->setVHost($this->credentials->getVirtualHost());
+	    try {
+            $this->link = new AMQPConnection();
+            $this->link->setHost($this->credentials->getHost());
+            $this->link->setPort($this->credentials->getPort());
+            $this->link->setLogin($this->credentials->getLogin());
+            $this->link->setPassword($this->credentials->getPassword());
+            $this->link->setVHost($this->credentials->getVirtualHost());
+        } catch(AMQPConnectionException $e) {
+            throw new AMQPServerConnectionException($e->getMessage(), $e->getCode(), $e);
+        }
 
 		return $this;
 	}
 }
-?>

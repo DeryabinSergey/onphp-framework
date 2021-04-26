@@ -11,81 +11,141 @@
 
 namespace OnPHP\Main\Util\AMQP;
 
+use OnPHP\Core\Exception\UnimplementedFeatureException;
+
 abstract class AMQPBaseConfig
 {
-	protected $passive = false;
-	protected $durable = false;
-	protected $autodelete = false;
-	protected $nowait = false;
-	protected $arguments = array();
+    /**
+     * @var bool
+     */
+	protected bool $passive = false;
+    /**
+     * @var bool
+     */
+	protected bool $durable = false;
+    /**
+     * @var bool
+     */
+	protected bool $autodelete = false;
+    /**
+     * @var bool
+     */
+	protected bool $nowait = false;
+    /**
+     * @var array
+     */
+	protected array $arguments = array();
 
-	public function getPassive()
+    /**
+     * @return static
+     **/
+    public static function create(): AMQPBaseConfig
+    {
+        return new static;
+    }
+
+    /**
+     * @return bool
+     */
+	public function getPassive(): bool
 	{
 		return $this->passive;
 	}
 
-	public function setPassive($passive)
+    /**
+     * @param bool $passive
+     * @return static
+     */
+	public function setPassive(bool $passive): AMQPBaseConfig
 	{
 		$this->passive = $passive === true;
 
 		return $this;
 	}
 
-	public function getDurable()
+    /**
+     * @return bool
+     */
+	public function getDurable():bool
 	{
 		return $this->durable;
 	}
 
-	public function setDurable($durable)
+    /**
+     * @param bool $durable
+     * @return static
+     */
+	public function setDurable(bool $durable): AMQPBaseConfig
 	{
 		$this->durable = $durable === true;
 
 		return $this;
 	}
 
-	public function getAutodelete()
+    /**
+     * @return bool
+     */
+	public function getAutodelete(): bool
 	{
 		return $this->autodelete;
 	}
 
-	public function setAutodelete($autodelete)
+    /**
+     * @param bool $autodelete
+     * @return static
+     */
+	public function setAutodelete(bool $autodelete): AMQPBaseConfig
 	{
 		$this->autodelete = $autodelete === true;
 
 		return $this;
 	}
 
-	public function getNowait()
+    /**
+     * @return bool
+     */
+	public function getNowait(): bool
 	{
 		return $this->nowait;
 	}
 
-	public function setNowait($nowait)
+    /**
+     * @param bool $nowait
+     * @return static
+     */
+	public function setNowait(bool $nowait): AMQPBaseConfig
 	{
 		$this->nowait = $nowait === true;
 
 		return $this;
 	}
 
-	public function setArguments(array $assoc)
+    /**
+     * @param array $assoc
+     * @return static
+     */
+	public function setArguments(array $assoc): AMQPBaseConfig
 	{
 		$this->arguments = $assoc;
 
 		return $this;
 	}
 
-	/**
-	 * @param AMQPBitmaskResolver $resolver
-	 * @return integer - it's bitmask
-	**/
-	public function getBitmask(AMQPBitmaskResolver $resolver)
+    /**
+     * @param AMQPBitmaskResolver $resolver
+     * @return int it's bitmask
+     * @throws UnimplementedFeatureException
+     */
+	public function getBitmask(AMQPBitmaskResolver $resolver): int
 	{
 		return $resolver->getBitmask($this);
 	}
 
-	public function getArguments()
+    /**
+     * @return array
+     */
+	public function getArguments(): array
 	{
 		return $this->arguments;
 	}
 }
-?>

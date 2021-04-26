@@ -11,52 +11,64 @@
 
 namespace OnPHP\Main\Util\AMQP;
 
+use OnPHP\Core\Exception\UnimplementedFeatureException;
+
 final class AMQPOutgoingMessage extends AMQPBaseMessage
 {
-	protected $mandatory = false;
-	protected $immediate = false;
+    /**
+     * @var bool
+     */
+	protected bool $mandatory = false;
+    /**
+     * @var bool
+     */
+	protected bool $immediate = false;
 
-	/**
-	 * @return AMQPOutgoingMessage
-	**/
-	public static function create()
-	{
-		return new self;
-	}
-
-	public function getBitmask(AMQPBitmaskResolver $config)
+    /**
+     * @param AMQPBitmaskResolver $config
+     * @return int
+     * @throws UnimplementedFeatureException
+     */
+	public function getBitmask(AMQPBitmaskResolver $config): int
 	{
 		return $config->getBitmask($this);
 	}
 
-	public function getMandatory()
+    /**
+     * @return bool
+     */
+	public function getMandatory(): bool
 	{
 		return $this->mandatory;
 	}
 
-	/**		 
-	 * @return AMQPOutgoingMessage
-	**/
-	public function setMandatory($mandatory)
+    /**
+     * @param bool $mandatory
+     * @return static
+     */
+	public function setMandatory(bool $mandatory): AMQPOutgoingMessage
 	{
 		$this->mandatory = $mandatory;
 
 		return $this;
 	}
 
-	public function getImmediate()
+    /**
+     * @return bool
+     */
+	public function getImmediate(): bool
 	{
 		return $this->immediate;
 	}
 
-	/**
-	 * @return AMQPOutgoingMessage
-	**/
-	public function setImmediate($immediate)
+    /**
+     * @param bool $immediate
+     * @return static
+     */
+	public function setImmediate(bool $immediate): AMQPOutgoingMessage
 	{
 		$this->immediate = $immediate;
 
 		return $this;
 	}
 }
-?>

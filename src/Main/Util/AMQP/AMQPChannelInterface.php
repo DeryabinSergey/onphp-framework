@@ -13,101 +13,127 @@ namespace OnPHP\Main\Util\AMQP;
 
 interface AMQPChannelInterface
 {
-	/**
-	 * @return true
-	**/
-	public function isOpen();
+    /**
+     * @return bool
+     */
+	public function isOpen(): bool;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function open();
+    /**
+     * @return static
+     */
+	public function open(): AMQPChannelInterface;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function close();
+    /**
+     * @return static
+     */
+	public function close(): AMQPChannelInterface;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function exchangeDeclare(
-		$name, AMQPExchangeConfig $conf
-	);
+    /**
+     * @param string $name
+     * @param AMQPExchangeConfig $conf
+     * @return static
+     */
+	public function exchangeDeclare(string $name, AMQPExchangeConfig $conf): AMQPChannelInterface;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function exchangeDelete(
-		$name, $ifUnused = false
-	);
+    /**
+     * @param string $name
+     * @param bool $ifUnused
+     * @return static
+     */
+	public function exchangeDelete(string $name, bool $ifUnused = false): AMQPChannelInterface;
 
-	/**
-	 * @see http://www.rabbitmq.com/blog/2010/10/19/exchange-to-exchange-bindings/
-	 * @return AMQPChannelInterface
-	**/
-	public function exchangeBind($destinationName, $sourceName, $routingKey);
+    /**
+     * @param string $destinationName
+     * @param string $sourceName
+     * @param string $routingKey
+     * @return static
+     * @see http://www.rabbitmq.com/blog/2010/10/19/exchange-to-exchange-bindings/
+     */
+	public function exchangeBind(string $destinationName, string $sourceName, string $routingKey): AMQPChannelInterface;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function exchangeUnbind($destinationName, $sourceName, $routingKey);
+    /**
+     * @param string $destinationName
+     * @param string $sourceName
+     * @param string $routingKey
+     * @return static
+     */
+	public function exchangeUnbind(string $destinationName, string $sourceName, string $routingKey): AMQPChannelInterface;
 
-	/**
-	 * @return integer - the message count in queue
-	**/
-	public function queueDeclare($name, AMQPQueueConfig $conf);
+    /**
+     * @param string $name
+     * @param AMQPQueueConfig $conf
+     * @return int the message count in queue
+     */
+	public function queueDeclare(string $name, AMQPQueueConfig $conf): int;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function queueBind($name, $exchange, $routingKey);
+    /**
+     * @param string $name
+     * @param string $exchange
+     * @param string $routingKey
+     * @return static
+     */
+	public function queueBind(string $name, string $exchange, string $routingKey): AMQPChannelInterface;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function queueUnbind($name, $exchange, $routingKey);
+    /**
+     * @param string $name
+     * @param string $exchange
+     * @param string $routingKey
+     * @return static
+     */
+	public function queueUnbind(string $name, string $exchange, string $routingKey): AMQPChannelInterface;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function queuePurge($name);
+    /**
+     * @param string $name
+     * @return static
+     */
+	public function queuePurge(string $name): AMQPChannelInterface;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function queueDelete($name);
+    /**
+     * @param string $name
+     * @return static
+     */
+	public function queueDelete(string $name): AMQPChannelInterface;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function basicPublish(
-		$exchange, $routingKey, AMQPOutgoingMessage $msg
-	);
+    /**
+     * @param string $exchange
+     * @param string $routingKey
+     * @param AMQPOutgoingMessage $msg
+     * @return static
+     */
+	public function basicPublish(string $exchange, string $routingKey, AMQPOutgoingMessage $msg): AMQPChannelInterface;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function basicQos($prefetchSize, $prefetchCount);
+    /**
+     * @param int $prefetchSize
+     * @param int $prefetchCount
+     * @return static
+     */
+	public function basicQos(int $prefetchSize, int $prefetchCount): AMQPChannelInterface;
 
-	/**
-	 * @return AMQPIncomingMessage
-	**/
-	public function basicGet($queue, $autoAck = true);
+    /**
+     * @param string $queue
+     * @param bool $autoAck
+     * @return AMQPIncomingMessage
+     */
+	public function basicGet(string $queue, bool $autoAck = true): AMQPIncomingMessage;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function basicAck($deliveryTag, $multiple = false);
+    /**
+     * @param string $deliveryTag
+     * @param bool $multiple
+     * @return static
+     */
+	public function basicAck(string $deliveryTag, bool $multiple = false): AMQPChannelInterface;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function basicConsume($queue, $autoAck, AMQPConsumer $callback);
+    /**
+     * @param string $queue
+     * @param bool $autoAck
+     * @param AMQPConsumer $callback
+     * @return static
+     */
+	public function basicConsume(string $queue, bool $autoAck, AMQPConsumer $callback): AMQPChannelInterface;
 
-	/**
-	 * @return AMQPChannelInterface
-	**/
-	public function basicCancel($consumerTag);
+    /**
+     * @param string $consumerTag
+     * @return static
+     */
+	public function basicCancel(string $consumerTag): AMQPChannelInterface;
 }
-?>

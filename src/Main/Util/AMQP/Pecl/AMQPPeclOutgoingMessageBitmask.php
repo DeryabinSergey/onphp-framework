@@ -12,6 +12,8 @@
 namespace OnPHP\Main\Util\AMQP\Pecl;
 
 use OnPHP\Core\Base\Assert;
+use OnPHP\Core\Exception\WrongArgumentException;
+use OnPHP\Main\Util\AMQP\AMQPBaseConfig;
 use OnPHP\Main\Util\AMQP\AMQPBitmaskResolver;
 use OnPHP\Main\Util\AMQP\AMQPOutgoingMessage;
 
@@ -20,19 +22,25 @@ use OnPHP\Main\Util\AMQP\AMQPOutgoingMessage;
 **/
 final class AMQPPeclOutgoingMessageBitmask implements AMQPBitmaskResolver
 {
-	public function getBitmask($config)
+    /**
+     * @param AMQPBaseConfig $config
+     * @return int
+     * @throws WrongArgumentException
+     */
+	public function getBitmask(AMQPBaseConfig $config): int
 	{
 		Assert::isInstance($config, AMQPOutgoingMessage::class);
 
 		$bitmask = 0;
 
-		if ($config->getMandatory())
-			$bitmask = $bitmask | AMQP_MANDATORY;
+		if ($config->getMandatory()) {
+            $bitmask = $bitmask | AMQP_MANDATORY;
+        }
 
-		if ($config->getImmediate())
-			$bitmask = $bitmask | AMQP_IMMEDIATE;
+		if ($config->getImmediate()) {
+            $bitmask = $bitmask | AMQP_IMMEDIATE;
+        }
 
 		return $bitmask;
 	}
 }
-?>

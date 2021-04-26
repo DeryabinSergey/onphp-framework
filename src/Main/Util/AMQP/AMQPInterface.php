@@ -13,6 +13,7 @@ namespace OnPHP\Main\Util\AMQP;
 
 use OnPHP\Core\Exception\MissingElementException;
 use OnPHP\Core\Exception\WrongArgumentException;
+use OnPHP\Main\Util\AMQP\Exception\AMQPServerConnectionException;
 
 /**
  * AMQP stands for Advanced Message Queue Protocol, which is
@@ -20,75 +21,78 @@ use OnPHP\Core\Exception\WrongArgumentException;
 **/
 interface AMQPInterface
 {
+    /**
+     * @return static
+     * @throws AMQPServerConnectionException
+     * @throws WrongArgumentException
+     */
+	public function connect(): AMQPInterface;
+
 	/**
-	 * @return AMQPInterface
+	 * @return static
+     * @throws WrongArgumentException
 	**/
-	public function connect();
+	public function disconnect(): AMQPInterface;
 
-	/**
-	 * @return AMQPInterface
-	**/
-	public function disconnect();
+    /**
+     * @return static
+     * @throws WrongArgumentException
+     */
+	public function reconnect(): AMQPInterface;
 
-	/**
-	 * @return AMQPInterface
-	**/
-	public function reconnect();
+    /**
+     * @return bool
+     * @throws WrongArgumentException
+     */
+	public function isConnected(): bool;
 
-	/**
-	 * @return boolean
-	**/
-	public function isConnected();
+    /**
+     * @return object|null
+     * @throws WrongArgumentException
+     */
+	public function getLink(): ?object;
 
-	/**
-	 * @return AMQPInterface
-	**/
-	public function getLink();
+    /**
+     * @param int $id
+     * @return AMQPChannelInterface
+     * @throws AMQPServerConnectionException
+     * @throws WrongArgumentException
+     */
+	public function createChannel(int $id): AMQPChannelInterface;
 
+    /**
+     * @param int $id
+     * @return AMQPChannelInterface
+     * @throws MissingElementException
+     */
+	public function getChannel(int $id): AMQPChannelInterface;
 
-	/**
-	 * @param integer $id
-	 * @throws WrongArgumentException
-	 * @return AMQPChannelInterface
-	**/
-	public function createChannel($id);
+    /**
+     * @return AMQPChannelInterface[]
+     */
+	public function getChannelList(): array;
 
-	/**
-	 * @throws MissingElementException
-	 * @return AMQPChannelInterface
-	**/
-	public function getChannel($id);
+    /**
+     * @param int $id
+     * @return static
+     * @throws MissingElementException
+     */
+	public function dropChannel(int $id): AMQPInterface;
 
+    /**
+     * @return AMQPCredentials
+     */
+	public function getCredentials(): AMQPCredentials;
 
-	/**
-	 * @return array
-	**/
-	public function getChannelList();
+    /**
+     * @return bool
+     * @throws WrongArgumentException
+     */
+	public function isAlive(): bool;
 
-	/**
-	 * @param integer $id
-	 * @throws MissingElementException
-	 * @return AMQPChannelInterface
-	**/
-	public function dropChannel($id);
-
-
-	/**
-	 * @return AMQPCredentials
-	 */
-	public function getCredentials();
-
-
-	/**
-	 * @return bool
-	 */
-	public function isAlive();
-
-
-	/**
-	 * @param bool $alive
-	 * @return AMQPInterface
-	 */
-	//public function setAlive($alive);
+    /**
+     * @param bool $alive
+     * @return static
+     */
+	//public function setAlive(bool $alive): AMQPInterface;
 }
-?>

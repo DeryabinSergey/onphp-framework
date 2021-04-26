@@ -25,101 +25,120 @@ final class AMQPCredentials
 	protected $login = null;
 	protected $password = null;
 
-	/**
-	 * @return AMQPCredentials
-	**/
-	public static function create()
+    /**
+     * @return static
+     */
+	public static function create(): AMQPCredentials
 	{
-		return new self();
+		return new static;
 	}
 
 	/**
-	 * @return AMQPCredentials
+	 * @return static
 	**/
-	public static function createDefault()
+	public static function createDefault(): AMQPCredentials
 	{
 		return
 			self::create()->
-			setHost(self::DEFAULT_HOST)->
-			setPort(self::DEFAULT_PORT)->
-			setLogin(self::DEFAULT_LOGIN)->
-			setPassword(self::DEFAULT_PASSWORD)->
-			setVirtualHost(self::DEFAULT_VHOST);
+                setHost(self::DEFAULT_HOST)->
+                setPort(self::DEFAULT_PORT)->
+                setLogin(self::DEFAULT_LOGIN)->
+                setPassword(self::DEFAULT_PASSWORD)->
+                setVirtualHost(self::DEFAULT_VHOST);
 	}
 
-	public function getHost()
+    /**
+     * @return string|null
+     */
+	public function getHost(): ?string
 	{
 		return $this->host;
 	}
 
-	/**
-	 * @return AMQPCredentials
-	**/
-	public function setHost($host)
+    /**
+     * @param string $host
+     * @return static
+     */
+	public function setHost(string $host): AMQPCredentials
 	{
 		$this->host = $host;
 
 		return $this;
 	}
 
-	public function getPort()
+    /**
+     * @return string
+     */
+	public function getPort(): ?string
 	{
 		return $this->port;
 	}
 
-	/**
-	 * @return AMQPCredentials
-	**/
-	public function setPort($port)
+    /**
+     * @param string $port
+     * @return static
+     */
+	public function setPort(string $port): AMQPCredentials
 	{
 		$this->port = $port;
 
 		return $this;
 	}
 
-	public function getVirtualHost()
+    /**
+     * @return string|null
+     */
+	public function getVirtualHost(): ?string
 	{
 		return $this->virtualHost;
 	}
 
-	/**
-	 * @return AMQPCredentials
-	**/
-	public function setVirtualHost($virtualHost)
+    /**
+     * @param string $virtualHost
+     * @return static
+     */
+	public function setVirtualHost(string $virtualHost): AMQPCredentials
 	{
 		$this->virtualHost = $virtualHost;
 
 		return $this;
 	}
 
-	public function getLogin()
+    /**
+     * @return string|null
+     */
+	public function getLogin(): ?string
 	{
 		return $this->login;
 	}
 
-	/**
-	 * @return AMQPCredentials
-	**/
-	public function setLogin($login)
+    /**
+     * @param string $login
+     * @return static
+     */
+	public function setLogin(string $login): AMQPCredentials
 	{
 		$this->login = $login;
 
 		return $this;
 	}
 
-	public function getPassword()
+    /**
+     * @return string|null
+     */
+	public function getPassword(): ?string
 	{
 		return $this->password;
 	}
 
-	/**
-	 * @return AMQPCredentials
-	**/
-	public function setPassword($password)
+    /**
+     * @param string $password
+     * @return static
+     */
+	public function setPassword(string $password): AMQPCredentials
 	{
 		$this->password = $password;
 
 		return $this;
 	}
 }
-?>

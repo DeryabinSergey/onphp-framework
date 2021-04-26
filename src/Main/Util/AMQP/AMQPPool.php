@@ -21,42 +21,47 @@ use OnPHP\Core\Exception\MissingElementException;
 **/
 final class AMQPPool extends Singleton implements Instantiatable
 {
-	private $default = null;
-	private $pool = array();
+	private ?AMQP $default = null;
+	private array $pool = array();
 
-	/**
-	 * @return AMQPPool
-	**/
-	public static function me()
+    /**
+     * @return static
+     * @throws MissingElementException
+     * @throws WrongArgumentException
+     */
+	public static function me(): AMQPPool
 	{
 		return Singleton::getInstance(__CLASS__);
 	}
 
-	/**
-	 * @return AMQPPool
-	**/
-	public function setDefault(AMQP $amqp)
+    /**
+     * @param AMQP $amqp
+     * @return static
+     */
+	public function setDefault(AMQP $amqp): AMQPPool
 	{
 		$this->default = $amqp;
 
 		return $this;
 	}
 
-	/**
-	 * @return AMQPPool
-	**/
-	public function dropDefault()
+    /**
+     * @return static
+     */
+	public function dropDefault(): AMQPPool
 	{
 		$this->default = null;
 
 		return $this;
 	}
 
-	/**
-	 * @throws WrongArgumentException
-	 * @return AMQPPool
-	**/
-	public function addLink($name, AMQP $amqp)
+    /**
+     * @param string $name
+     * @param AMQP $amqp
+     * @return static
+     * @throws WrongArgumentException
+     */
+	public function addLink(string $name, AMQP $amqp): AMQPPool
 	{
 		if (isset($this->pool[$name]))
 			throw new WrongArgumentException(
@@ -68,45 +73,53 @@ final class AMQPPool extends Singleton implements Instantiatable
 		return $this;
 	}
 
-	/**
-	 * @throws MissingElementException
-	 * @return AMQPPool
-	**/
-	public function dropLink($name)
+    /**
+     * @param string $name
+     * @return static
+     * @throws MissingElementException
+     */
+	public function dropLink(string $name): AMQPPool
 	{
-		if (!isset($this->pool[$name]))
-			throw new MissingElementException(
-				"amqp link with name '{$name}' not found"
-			);
+		if (!isset($this->pool[$name])) {
+            throw new MissingElementException(
+                "amqp link with name '{$name}' not found"
+            );
+        }
 
 		unset($this->pool[$name]);
 
 		return $this;
 	}
 
-	/**
-	 * @throws MissingElementException
-	 * @return AMQP
-	**/
-	public function getLink($name = null)
+    /**
+     * @param string|null $name
+     * @return AMQP
+     * @throws Exception\AMQPServerConnectionException
+     * @throws MissingElementException
+     * @throws WrongArgumentException
+     */
+	public function getLink(string $name = null): AMQP
 	{
 		$link = null;
 
 		// single-amqp project
 		if (!$name) {
-			if (!$this->default)
-				throw new MissingElementException(
-					'i have no default amqp link and '
-					.'requested link name is null'
-				);
+			if (!$this->default) {
+                throw new MissingElementException(
+                    'i have no default amqp link and '
+                    . 'requested link name is null'
+                );
+            }
 
 			$link = $this->default;
-		} elseif (isset($this->pool[$name]))
-			$link = $this->pool[$name];
+		} elseif (isset($this->pool[$name])) {
+            $link = $this->pool[$name];
+        }
 
 		if ($link) {
-			if (!$link->isConnected())
-				$link->connect();
+			if (!$link->isConnected()) {
+                $link->connect();
+            }
 
 			return $link;
 		}
@@ -116,10 +129,11 @@ final class AMQPPool extends Singleton implements Instantiatable
 		);
 	}
 
-	/**
-	 * @return AMQPPool
-	**/
-	public function shutdown()
+    /**
+     * @return static
+     * @throws WrongArgumentException
+     */
+	public function shutdown(): AMQPPool
 	{
 		$this->disconnect();
 
@@ -129,24 +143,27 @@ final class AMQPPool extends Singleton implements Instantiatable
 		return $this;
 	}
 
-	/**
-	 * @return AMQPPool
-	**/
-	public function disconnect()
+    /**
+     * @return static
+     * @throws WrongArgumentException
+     */
+	public function disconnect(): AMQPPool
 	{
-		if ($this->default)
-			$this->default->disconnect();
+		if ($this->default) {
+            $this->default->disconnect();
+        }
 
-		foreach ($this->pool as $amqp)
-			$amqp->disconnect();
+		foreach ($this->pool as $amqp) {
+            $amqp->disconnect();
+        }
 
 		return $this;
 	}
 
-	/**
-	 * @return array
-	 */
-	public function getList()
+    /**
+     * @return array
+     */
+	public function getList(): array
 	{
 		$list = $this->pool;
 
@@ -157,4 +174,3 @@ final class AMQPPool extends Singleton implements Instantiatable
 		return $list;
 	}
 }
-?>
