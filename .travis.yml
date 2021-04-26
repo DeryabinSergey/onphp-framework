@@ -17,6 +17,7 @@ before_install:
           yes | pecl install memcache
         fi
     - no | pecl install memcached
+    - sudo apt-get install -q -y librabbitmq-dev
     - yes | pecl install amqp-1.10.2
     - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
     - mysql -e 'CREATE DATABASE onphp;'
