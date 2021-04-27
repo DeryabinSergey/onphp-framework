@@ -28,7 +28,10 @@ before_install:
         #cmake ..
         cmake .. -GNinja -DBUILD_EXAMPLES=ON -DBUILD_TOOLS=ON -DBUILD_TOOLS_DOCS=ON -DCMAKE_INSTALL_PREFIX=$PWD/../_install -DCMAKE_C_FLAGS="-Wall -Wextra -Wstrict-prototypes -Wno-unused-function -Wno-implicit-fallthrough -Werror"
         cmake --build . --target install
-    - yes | pecl install amqp
+    #- yes | pecl install amqp
+    - php -v
+    - php -m
+    - php -i
     - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
     - mysql -e 'CREATE DATABASE onphp;'
     - psql -c 'create database onphp;' -U postgres
