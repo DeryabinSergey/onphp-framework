@@ -17,6 +17,7 @@ before_install:
         fi
     - no | pecl install memcached
     #- sudo apt install -y xmlto ninja-build rabbitmq-server librabbitmq-dev doxygen libpopt-dev
+    - sudo add-apt-repository universe
     - sudo apt-get update -q
     - sudo apt install -y xmlto ninja-build doxygen libpopt-dev libssl1.1
     - |
