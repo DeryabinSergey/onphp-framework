@@ -13,7 +13,7 @@ namespace OnPHP\Main\Util\AMQP;
 
 final class AMQPCredentials
 {
-	const DEFAULT_HOST = 'rabbit';
+	const DEFAULT_HOST = 'localhost';
 	const DEFAULT_PORT = '5672';
 	const DEFAULT_LOGIN = 'guest';
 	const DEFAULT_PASSWORD = 'guest';

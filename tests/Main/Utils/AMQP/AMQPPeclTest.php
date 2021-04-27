@@ -200,7 +200,7 @@ class AMQPPeclTest extends TestCase
 		try {
 			$c = new AMQPPecl(
 				AMQPCredentials::create()->
-					setHost('rabbit')->
+					setHost('localhost')->
 					setPort(5672)->
 					setLogin('guest')->
 					setPassword('guest')->
@@ -219,7 +219,7 @@ class AMQPPeclTest extends TestCase
 	{
 		$c = new AMQPPecl(
 			AMQPCredentials::create()->
-				setHost('rabbit')->
+				setHost('localhost')->
 				setPort(5672)->
 				setLogin('guest')->
 				setPassword('guest')->
