@@ -5,7 +5,6 @@ services:
     - postgresql
     - redis-server
     - memcached
-    - rabbitmq
 php:
     - 7.4.6
     - 8.0.2
@@ -17,7 +16,7 @@ before_install:
           yes | pecl install memcache
         fi
     - no | pecl install memcached
-    - sudo apt install -y xmlto ninja-build rabbitmq-server librabbitmq-dev doxygen libpopt-dev php-amqp
+    - sudo apt install -y xmlto ninja-build rabbitmq-server librabbitmq-dev doxygen libpopt-dev
     - |
         git clone https://github.com/alanxz/rabbitmq-c.git
         cd rabbitmq-c
