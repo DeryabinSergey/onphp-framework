@@ -18,7 +18,7 @@ before_install:
     - no | pecl install memcached
     #- sudo apt install -y xmlto ninja-build rabbitmq-server librabbitmq-dev doxygen libpopt-dev
     - sudo apt-get update -q
-    - sudo apt install -y xmlto ninja-build doxygen libpopt-dev
+    - sudo apt install -y xmlto ninja-build doxygen libpopt-dev libssl1.1
     - |
         wget http://ftp.hetzner.de/ubuntu/security/pool/universe/libr/librabbitmq/librabbitmq4_0.8.0-1ubuntu0.18.04.2_amd64.deb
         sudo dpkg -i librabbitmq4_0.8.0-1ubuntu0.18.04.2_amd64.deb
