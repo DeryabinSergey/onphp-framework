@@ -17,7 +17,7 @@ before_install:
           yes | pecl install memcache
         fi
     - no | pecl install memcached
-    - sudo apt install -y xmlto ninja-build rabbitmq-server librabbitmq-dev doxygen libpopt-dev
+    - sudo apt install -y xmlto ninja-build rabbitmq-server librabbitmq-dev doxygen libpopt-dev php-amqp
     - |
         git clone https://github.com/alanxz/rabbitmq-c.git
         cd rabbitmq-c
