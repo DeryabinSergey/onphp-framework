@@ -25,7 +25,7 @@ before_install:
         git submodule update
         mkdir build && cd build
         cmake ..
-        cmake --build . --target install
+        sudo cmake --build . --target install
     - yes | pecl install amqp-1.10.2
     - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
     - mysql -e 'CREATE DATABASE onphp;'
