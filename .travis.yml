@@ -26,7 +26,7 @@ before_install:
         git submodule update
         mkdir build && cd build
         cmake .. -GNinja -DBUILD_EXAMPLES=ON -DBUILD_TOOLS=ON -DBUILD_TOOLS_DOCS=ON -DCMAKE_INSTALL_PREFIX=$PWD/../_install -DCMAKE_C_FLAGS="-Wall -Wextra -Wstrict-prototypes -Wno-unused-function -Wno-implicit-fallthrough -Werror"
-        export LD_LIBRARY_PATH=$PWD/../_install/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+        export LD__PATH=$PWD/../_install/lib/x86_64-linux-gnu
         cmake --build . --target install
         cd ../..
         #git clone https://github.com/php-amqp/php-amqp.git
@@ -37,7 +37,7 @@ before_install:
         #phpize
         #./configure --with-php-config=/usr/local/php/bin/php-config --with-amqp --with-librabbitmq-dir=/usr/local/rabbitmq-c
         #make && make install
-    - pecl install amqp
+    - $LD__PATH | pecl install amqp
     #- yes | pecl -d with-librabbitmq-dir=/home/travis/build/DeryabinSergey/onphp-framework/rabbitmq-c/_install/ install amqp
     - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
     - mysql -e 'CREATE DATABASE onphp;'
