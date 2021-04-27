@@ -29,7 +29,15 @@ before_install:
         export LD_LIBRARY_PATH=$PWD/../_install/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
         cmake --build . --target install
         cd ../..
-    - yes | pecl install amqp
+        #git clone https://github.com/php-amqp/php-amqp.git
+        #cd rabbitmq-c
+        #git checkout v1.10.2
+        #git submodule init
+        #git submodule update
+        #phpize
+        #./configure --with-php-config=/usr/local/php/bin/php-config --with-amqp --with-librabbitmq-dir=/usr/local/rabbitmq-c
+        #make && make install
+    - pecl install amqp
     #- yes | pecl -d with-librabbitmq-dir=/home/travis/build/DeryabinSergey/onphp-framework/rabbitmq-c/_install/ install amqp
     - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
     - mysql -e 'CREATE DATABASE onphp;'
