@@ -17,11 +17,11 @@ before_install:
           yes | pecl install memcache
         fi
     - no | pecl install memcached
-    - git clone https://github.com/alanxz/rabbitmq-c.git && \
-        cd rabbitmq-c && \
-        git checkout v0.11.0 && \
-        ./configure && \
-        make && make install
+    - git clone https://github.com/alanxz/rabbitmq-c.git
+    - cd rabbitmq-c
+    - git checkout v0.11.0
+    - ./configure
+    - make && make install
     - yes | pecl install amqp-1.10.2
     - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
     - mysql -e 'CREATE DATABASE onphp;'
