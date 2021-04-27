@@ -17,7 +17,7 @@ before_install:
           yes | pecl install memcache
         fi
     - no | pecl install memcached
-    - sudo apt install -y xmlto ninja-build rabbitmq-server librabbitmq-dev php-amqp doxygen popt-dev
+    - sudo apt install -y xmlto ninja-build rabbitmq-server librabbitmq-dev doxygen popt-dev
     - |
         git clone https://github.com/alanxz/rabbitmq-c.git
         cd rabbitmq-c
@@ -27,7 +27,7 @@ before_install:
         mkdir build && cd build
         cmake .. -GNinja -DBUILD_EXAMPLES=ON -DBUILD_TOOLS=ON -DBUILD_TOOLS_DOCS=ON -DCMAKE_INSTALL_PREFIX=$PWD/../_install -DCMAKE_C_FLAGS="-Wall -Wextra -Wstrict-prototypes -Wno-unused-function -Wno-implicit-fallthrough -Werror"
         cmake --build . --target install
-        cd ..
+        cd ../..
     #- yes | pecl install amqp
     - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
     - mysql -e 'CREATE DATABASE onphp;'
