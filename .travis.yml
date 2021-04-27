@@ -17,7 +17,7 @@ before_install:
           yes | pecl install memcache
         fi
     - no | pecl install memcached
-    - sudo apt install -y xmlto ninja-build librabbitmq librabbitmq-dev
+    - sudo apt install -y xmlto ninja-build amqp librabbitmq-dev
     - |
         git clone https://github.com/alanxz/rabbitmq-c.git
         cd rabbitmq-c
