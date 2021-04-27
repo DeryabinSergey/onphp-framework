@@ -37,7 +37,7 @@ class AMQPTestCaseNoAckQueueConsumer extends AMQPPeclQueueConsumer
 		$this->checkString .= 'C';
 	}
 
-	public function handleConsumeOk(string $consumerTag): void
+	public function handleConsumeOk(string $consumerTag = null): void
 	{
 		$this->checkString .= 'A';
 
@@ -76,7 +76,7 @@ class AMQPTestCaseAutoAckQueueConsumer extends AMQPPeclQueueConsumer
 		$this->checkString .= 'C';
 	}
 
-	public function handleConsumeOk(string $consumerTag): void
+	public function handleConsumeOk(string $consumerTag = null): void
 	{
 		$this->checkString .= 'A';
 
@@ -112,7 +112,7 @@ class AMQPPeclTest extends TestCase
 	/**
 	 * cluster master-slave of 2 nodes on single machine
 	 */
-	const PORT_MIRRORED = 5673; // port of slave node
+	const PORT_MIRRORED = '5673'; // port of slave node
 
 	protected static array $queueList = array(
 		// basic queue
@@ -200,7 +200,7 @@ class AMQPPeclTest extends TestCase
 		try {
 			$c = new AMQPPecl(
 				AMQPCredentials::create()->
-					setHost('localhost')->
+					setHost('rabbit')->
 					setPort(5672)->
 					setLogin('guest')->
 					setPassword('guest')->
@@ -219,7 +219,7 @@ class AMQPPeclTest extends TestCase
 	{
 		$c = new AMQPPecl(
 			AMQPCredentials::create()->
-				setHost('localhost')->
+				setHost('rabbit')->
 				setPort(5672)->
 				setLogin('guest')->
 				setPassword('guest')->
@@ -233,7 +233,7 @@ class AMQPPeclTest extends TestCase
 		$this->assertSame(3, count($c->getChannelList()));
 
 		$this->assertInstanceOf(
-			'AMQPPeclChannel',
+			AMQPPeclChannel::class,
 			$c->getChannel(1)
 		);
 
@@ -790,7 +790,7 @@ class AMQPPeclTest extends TestCase
 	 * @param AMQPPeclChannel $label
 	 * @return AMQPPeclChannel
 	 */
-	protected function exchangeDeclare(AMQPChannelInterface $channel, $label)
+	protected function exchangeDeclare(AMQPChannelInterface $channel, string $label)
 	{
 		$this->assertTrue(isset(self::$queueList[$label]));
 

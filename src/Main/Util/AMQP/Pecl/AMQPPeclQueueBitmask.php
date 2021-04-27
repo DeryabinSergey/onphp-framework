@@ -23,12 +23,12 @@ use OnPHP\Main\Util\AMQP\AMQPQueueConfig;
 final class AMQPPeclQueueBitmask extends AMQPPeclBaseBitmask
 {
     /**
-     * @param AMQPBaseConfig $config
+     * @param object $config
      * @return int
      * @throws UnimplementedFeatureException
      * @throws WrongArgumentException
      */
-	public function getBitmask(AMQPBaseConfig $config): int
+	public function getBitmask(object $config): int
 	{
 		Assert::isInstance($config, AMQPQueueConfig::class);
 

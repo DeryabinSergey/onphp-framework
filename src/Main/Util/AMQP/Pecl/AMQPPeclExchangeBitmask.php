@@ -23,12 +23,12 @@ use OnPHP\Main\Util\AMQP\AMQPExchangeConfig;
 final class AMQPPeclExchangeBitmask extends AMQPPeclBaseBitmask
 {
     /**
-     * @param AMQPBaseConfig $config
+     * @param object $config
      * @return int
      * @throws UnimplementedFeatureException
      * @throws WrongArgumentException
      */
-	public function getBitmask(AMQPBaseConfig $config): int
+	public function getBitmask(object $config): int
 	{
 		Assert::isInstance($config, AMQPExchangeConfig::class);
 

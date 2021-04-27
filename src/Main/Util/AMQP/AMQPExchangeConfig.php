@@ -45,9 +45,9 @@ final class AMQPExchangeConfig extends AMQPBaseConfig
 	}
 
     /**
-     * @return bool
+     * @return ?bool
      */
-	public function getInternal(): bool
+	public function getInternal(): ?bool
 	{
 		return $this->internal;
 	}

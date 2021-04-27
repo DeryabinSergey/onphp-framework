@@ -30,7 +30,7 @@ interface AMQPConsumer
      * to {@link Channel#basicConsume}.
      * @param string $consumerTag the defined consumerTag
      */
-	public function handleConsumeOk(string $consumerTag): void;
+	public function handleConsumeOk(string $consumerTag = null): void;
 
     /**
      * Called when the consumer is deregistered by a call
@@ -77,7 +77,7 @@ interface AMQPConsumer
     /**
      * @return string
      */
-	public function getConsumerTag(): string;
+	public function getConsumerTag(): ?string;
 
     /**
      * @return ?AMQPIncomingMessage

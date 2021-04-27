@@ -16,9 +16,9 @@ use OnPHP\Core\Exception\UnimplementedFeatureException;
 interface AMQPBitmaskResolver
 {
     /**
-     * @param AMQPBaseConfig $config
+     * @param object $config
      * @return int
      * @throws UnimplementedFeatureException
      */
-	public function getBitmask(AMQPBaseConfig $config): int;
+	public function getBitmask(object $config): int;
 }

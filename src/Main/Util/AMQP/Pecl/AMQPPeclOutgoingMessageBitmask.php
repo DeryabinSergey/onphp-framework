@@ -23,11 +23,11 @@ use OnPHP\Main\Util\AMQP\AMQPOutgoingMessage;
 final class AMQPPeclOutgoingMessageBitmask implements AMQPBitmaskResolver
 {
     /**
-     * @param AMQPBaseConfig $config
+     * @param object $config
      * @return int
      * @throws WrongArgumentException
      */
-	public function getBitmask(AMQPBaseConfig $config): int
+	public function getBitmask(object $config): int
 	{
 		Assert::isInstance($config, AMQPOutgoingMessage::class);
 

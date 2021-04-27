@@ -18,11 +18,11 @@ use OnPHP\Core\Exception\UnimplementedFeatureException;
 abstract class AMQPPeclBaseBitmask implements AMQPBitmaskResolver
 {
     /**
-     * @param AMQPBaseConfig $config
+     * @param object $config
      * @return int
      * @throws UnimplementedFeatureException
      */
-	public function getBitmask(AMQPBaseConfig $config): int
+	public function getBitmask(object $config): int
 	{
         if ($config->getNowait()) {
             throw new UnimplementedFeatureException();

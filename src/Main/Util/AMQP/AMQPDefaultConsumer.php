@@ -52,7 +52,7 @@ abstract class AMQPDefaultConsumer implements AMQPConsumer
     /**
      * @return string
      */
-	public function getConsumerTag(): string
+	public function getConsumerTag(): ?string
 	{
 		return $this->consumerTag;
 	}
@@ -60,7 +60,7 @@ abstract class AMQPDefaultConsumer implements AMQPConsumer
     /**
      * @param string $consumerTag
      */
-	public function handleConsumeOk(string $consumerTag): void
+	public function handleConsumeOk(string $consumerTag = null): void
 	{
 		// no work to do
 	}

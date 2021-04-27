@@ -39,17 +39,17 @@ class AMQPProxyChannel implements AMQPChannelInterface
 	}
 
     /**
-     * @return static
+     * @return AMQPChannelInterface
      */
-	public function open(): AMQPProxyChannel
+	public function open(): AMQPChannelInterface
 	{
 		return $this->channel->open();
 	}
 
     /**
-     * @return static
+     * @return AMQPChannelInterface
      */
-	public function close(): AMQPProxyChannel
+	public function close(): AMQPChannelInterface
 	{
 		return $this->channel->close();
 	}
@@ -57,10 +57,10 @@ class AMQPProxyChannel implements AMQPChannelInterface
     /**
      * @param string $name
      * @param AMQPExchangeConfig $conf
-     * @return static
+     * @return AMQPChannelInterface
      * @throws AMQPServerException
      */
-	public function exchangeDeclare($name, AMQPExchangeConfig $conf): AMQPProxyChannel
+	public function exchangeDeclare($name, AMQPExchangeConfig $conf): AMQPChannelInterface
 	{
 		try {
 			return $this->channel->exchangeDeclare($name, $conf);
@@ -74,10 +74,10 @@ class AMQPProxyChannel implements AMQPChannelInterface
     /**
      * @param string $name
      * @param bool $ifUnused
-     * @return static
+     * @return AMQPChannelInterface
      * @throws AMQPServerException
      */
-	public function exchangeDelete(string $name, bool $ifUnused = false): AMQPProxyChannel
+	public function exchangeDelete(string $name, bool $ifUnused = false): AMQPChannelInterface
 	{
 		try {
 			return $this->channel->exchangeDelete($name, $ifUnused);
@@ -92,10 +92,10 @@ class AMQPProxyChannel implements AMQPChannelInterface
      * @param string $destinationName
      * @param string $sourceName
      * @param string $routingKey
-     * @return static
+     * @return AMQPChannelInterface
      * @throws AMQPServerException
      */
-	public function exchangeBind(string $destinationName, string $sourceName, string $routingKey): AMQPProxyChannel
+	public function exchangeBind(string $destinationName, string $sourceName, string $routingKey): AMQPChannelInterface
 	{
 		try {
 			return $this->channel->exchangeBind(
@@ -118,10 +118,10 @@ class AMQPProxyChannel implements AMQPChannelInterface
      * @param string $destinationName
      * @param string $sourceName
      * @param string $routingKey
-     * @return static
+     * @return AMQPChannelInterface
      * @throws AMQPServerException
      */
-	public function exchangeUnbind(string $destinationName, string $sourceName, string $routingKey): AMQPProxyChannel
+	public function exchangeUnbind(string $destinationName, string $sourceName, string $routingKey): AMQPChannelInterface
 	{
 		try {
 			return $this->channel->exchangeUnbind(
@@ -161,10 +161,10 @@ class AMQPProxyChannel implements AMQPChannelInterface
      * @param string $name
      * @param string $exchange
      * @param string $routingKey
-     * @return string
+     * @return AMQPChannelInterface
      * @throws AMQPServerException
      */
-	public function queueBind(string $name, string $exchange, string $routingKey): AMQPProxyChannel
+	public function queueBind(string $name, string $exchange, string $routingKey): AMQPChannelInterface
 	{
 		try {
 			return $this->channel->queueBind(
@@ -187,10 +187,10 @@ class AMQPProxyChannel implements AMQPChannelInterface
      * @param string $name
      * @param string $exchange
      * @param string $routingKey
-     * @return static
+     * @return AMQPChannelInterface
      * @throws AMQPServerException
      */
-	public function queueUnbind(string $name, string $exchange, string $routingKey): AMQPProxyChannel
+	public function queueUnbind(string $name, string $exchange, string $routingKey): AMQPChannelInterface
 	{
 		try {
 			return $this->channel->queueUnbind(
@@ -211,10 +211,10 @@ class AMQPProxyChannel implements AMQPChannelInterface
 
     /**
      * @param string $name
-     * @return static
+     * @return AMQPChannelInterface
      * @throws AMQPServerException
      */
-	public function queuePurge(string $name): AMQPProxyChannel
+	public function queuePurge(string $name): AMQPChannelInterface
 	{
 		try {
 			return $this->channel->queuePurge($name);
@@ -227,10 +227,10 @@ class AMQPProxyChannel implements AMQPChannelInterface
 
     /**
      * @param string $name
-     * @return static
+     * @return AMQPChannelInterface
      * @throws AMQPServerException
      */
-	public function queueDelete(string $name): AMQPProxyChannel
+	public function queueDelete(string $name): AMQPChannelInterface
 	{
 		try {
 			return $this->channel->queueDelete($name);
@@ -245,10 +245,10 @@ class AMQPProxyChannel implements AMQPChannelInterface
      * @param string $exchange
      * @param string $routingKey
      * @param AMQPOutgoingMessage $msg
-     * @return static
+     * @return AMQPChannelInterface
      * @throws AMQPServerException
      */
-	public function basicPublish(string $exchange, string $routingKey, AMQPOutgoingMessage $msg): AMQPProxyChannel
+	public function basicPublish(string $exchange, string $routingKey, AMQPOutgoingMessage $msg): AMQPChannelInterface
 	{
 		try {
 			return $this->channel->basicPublish(
@@ -266,10 +266,10 @@ class AMQPProxyChannel implements AMQPChannelInterface
     /**
      * @param int $prefetchSize
      * @param int $prefetchCount
-     * @return static
+     * @return AMQPChannelInterface
      * @throws AMQPServerException
      */
-	public function basicQos(int $prefetchSize, int $prefetchCount): AMQPProxyChannel
+	public function basicQos(int $prefetchSize, int $prefetchCount): AMQPChannelInterface
 	{
 		try {
 			return $this->channel->basicQos($prefetchSize, $prefetchCount);
@@ -283,7 +283,7 @@ class AMQPProxyChannel implements AMQPChannelInterface
     /**
      * @param string $queue
      * @param bool $autoAck
-     * @return static
+     * @return AMQPIncomingMessage
      * @throws AMQPServerException
      */
 	public function basicGet(string $queue, bool $autoAck = true): AMQPIncomingMessage
@@ -300,10 +300,10 @@ class AMQPProxyChannel implements AMQPChannelInterface
     /**
      * @param string $deliveryTag
      * @param bool $multiple
-     * @return static
+     * @return AMQPChannelInterface
      * @throws AMQPServerException
      */
-	public function basicAck(string $deliveryTag, bool $multiple = false): AMQPProxyChannel
+	public function basicAck(string $deliveryTag, bool $multiple = false): AMQPChannelInterface
 	{
 		try {
 			return $this->channel->basicAck($deliveryTag, $multiple);
@@ -318,10 +318,10 @@ class AMQPProxyChannel implements AMQPChannelInterface
      * @param string $queue
      * @param bool $autoAck
      * @param AMQPConsumer $callback
-     * @return static
+     * @return AMQPChannelInterface
      * @throws AMQPServerException
      */
-	public function basicConsume(string $queue, bool $autoAck, AMQPConsumer $callback): AMQPProxyChannel
+	public function basicConsume(string $queue, bool $autoAck, AMQPConsumer $callback): AMQPChannelInterface
 	{
 		try {
 			return $this->channel->basicConsume($queue, $autoAck, $callback);
@@ -334,10 +334,10 @@ class AMQPProxyChannel implements AMQPChannelInterface
 
     /**
      * @param string $consumerTag
-     * @return static
+     * @return AMQPChannelInterface
      * @throws AMQPServerException
      */
-	public function basicCancel(string $consumerTag): AMQPProxyChannel
+	public function basicCancel(string $consumerTag): AMQPChannelInterface
 	{
 		try {
 			return $this->channel->basicCancel($consumerTag);
@@ -350,7 +350,7 @@ class AMQPProxyChannel implements AMQPChannelInterface
 
     /**
      * @param Throwable $e
-     * @return static
+     * @return AMQPProxyChannel
      * @throws AMQPServerException
      */
 	protected function transportReconnect(Throwable $e): AMQPProxyChannel
