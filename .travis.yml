@@ -39,9 +39,9 @@ before_install:
         #make && make install
     #- $LD__PATH | pecl install amqp
     - |
-        wget --directory-prefix=/usr/local/bin/ https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions
-        chmod +x /usr/local/bin/install-php-extensions && sync
-        install-php-extensions amqp
+        wget https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions
+        chmod +x install-php-extensions && sync
+        ./install-php-extensions amqp
     #- yes | pecl -d with-librabbitmq-dir=/home/travis/build/DeryabinSergey/onphp-framework/rabbitmq-c/_install/ install amqp
     - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
     - mysql -e 'CREATE DATABASE onphp;'
